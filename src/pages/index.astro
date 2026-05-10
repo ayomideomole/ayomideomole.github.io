@@ -1,0 +1,846 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const featuredWork = (await getCollection('work', (e) => e.data.featured && e.data.published !== false))
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+
+---
+<Layout
+  pageClass="home"
+  title="Ayo Omole"
+  description="Ayo Omole — senior product designer based in Tallinn. Born in Nigeria."
+>
+  <r-grid class="main" columns="6" columns-s="4" columns-xs="2">
+
+    <r-cell order="-10" span="row">
+      <h1 class="hero-statement">
+        Senior product designer at Malwarebytes. Systems thinker, craft-led, six years across AI, enterprise, and early-stage products.
+      </h1>
+    </r-cell>
+
+    <r-cell span="row" class="wn-section">
+      <div class="wn-head">
+        <div class="wn-head-l">
+          <h2 class="wn-title">Featured Work</h2>
+          <span class="wn-count">{String(featuredWork.length).padStart(2, '0')} projects</span>
+        </div>
+        <div class="wn-controls" role="group" aria-label="Carousel controls">
+          <button type="button" class="wn-arrow" data-dir="prev" aria-label="Previous">&larr;</button>
+          <button type="button" class="wn-arrow" data-dir="next" aria-label="Next">&rarr;</button>
+        </div>
+      </div>
+
+      <ul class="wn-track" id="wn-track">
+        {featuredWork.map((w, i) => {
+          const cardFillBySlug = {
+            'ai':           '#e5e6e8',
+            'one-capital':  '#a695d4',
+            'mint-pay':     '#c19265',
+            'seb-baltic':   '#7a8d52',
+            'canary-works': '#ecf0f4',
+            'zesto':        '#f4eee0',
+          };
+          const fallbacks = ['#0f1d07', '#3d1a22', '#1a3d8f', '#4a2218', '#2a3a32'];
+          const fillFor = (slug, i) => cardFillBySlug[slug] || fallbacks[i % 5];
+          const rawCat = w.data.category ?? w.data.tags[0] ?? 'Case study';
+          const cat = rawCat.charAt(0).toUpperCase() + rawCat.slice(1);
+          return (
+            <li class="wn-card">
+              <a href={`/${w.data.slug}`}>
+                <div class="wn-thumb" style={`--wn-fill:${fillFor(w.data.slug, i)};`}>
+                  <div class="wn-pills" aria-hidden="true">
+                    <span class="wn-name">{w.data.company}</span>
+                    <span class="wn-tag">{cat}</span>
+                  </div>
+                </div>
+                <h3 class="wn-card-title">{w.data.cardLede ?? w.data.summary}</h3>
+                <span class="wn-cta">Case study &rarr;</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </r-cell>
+
+    <r-cell span="row" class="bio-section">
+      <article class="bio-card">
+        <h2 class="bio-headline">
+          <span class="bio-highlight">Designing experiences</span> that empower people across cultures and technologies. Rooted in Nigeria, growing from every place I've called home — currently shaping how AI lives inside cybersecurity workflows at Malwarebytes.
+        </h2>
+        <ul class="bio-tiles" aria-label="Imagery">
+          <li class="bio-tile bio-tile--photo" data-tilt="-2">
+            <img src="/bio.png" alt="Ayo Omole" loading="lazy" decoding="async" />
+            <figcaption class="bio-tile-cap">Tallinn · 2024</figcaption>
+          </li>
+          <li class="bio-tile bio-tile--photo" data-tilt="1.5">
+            <img src="/IMG_3623.jpg" alt="" loading="lazy" decoding="async" />
+            <figcaption class="bio-tile-cap">Studio · field notes</figcaption>
+          </li>
+          <li class="bio-tile bio-tile--photo" data-tilt="-1">
+            <img src="/IMG_2198.jpg" alt="" loading="lazy" decoding="async" />
+            <figcaption class="bio-tile-cap">Lagos · home</figcaption>
+          </li>
+          <li class="bio-tile bio-tile--photo" data-tilt="2">
+            <img src="/IMG_1696.jpg" alt="" loading="lazy" decoding="async" />
+            <figcaption class="bio-tile-cap">On the road · 2023</figcaption>
+          </li>
+          <li class="bio-tile bio-tile--photo" data-tilt="0">
+            <img src="/IMG_1535.jpg" alt="" loading="lazy" decoding="async" />
+            <figcaption class="bio-tile-cap">Side projects</figcaption>
+          </li>
+        </ul>
+        <div class="bio-extra" id="bio-extra" aria-hidden="true">
+          <div class="bio-extra-inner">
+            <p>
+              I am a Product Designer who specializes in simplifying complex systems and designing products that scale across diverse markets. Born in Nigeria and now based in Estonia, I bring a global approach to problem solving and a deep respect for cultural context in design.
+            </p>
+            <p>
+              I've contributed to strategic product work for leading companies in Africa and Europe, delivering solutions in fintech, enterprise operations, and logistics. My experience spans early concept exploration to high-fidelity delivery, always grounded in user insights and measurable business outcomes.
+            </p>
+            <p>
+              I hold a Master's in Human Computer Interaction from the University of Tartu, where I developed a strong foundation in user behavior, accessibility, and evidence-based design. Outside of work, I advise first-time founders on early product strategy and explore filmmaking as a way to better understand narrative and engagement.
+            </p>
+            <p>
+              I care about products that matter, teams that collaborate well, and design that empowers people — no matter where they are in the world.
+            </p>
+          </div>
+        </div>
+        <button type="button" class="bio-button" id="bio-toggle" aria-expanded="false" aria-controls="bio-extra">
+          <span class="bio-button-label">Read full bio</span>
+          <span class="bio-button-arrow" aria-hidden="true">
+            <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <line class="bio-arrow-h" x1="2" y1="6" x2="10" y2="6" />
+              <line class="bio-arrow-v" x1="6" y1="2" x2="6" y2="10" />
+            </svg>
+          </span>
+        </button>
+      </article>
+    </r-cell>
+
+  </r-grid>
+
+  <!-- Case study sheet — slides up from the bottom, iOS-drawer style -->
+  <div class="cs-sheet-backdrop" id="cs-modal-backdrop" hidden></div>
+  <div class="cs-sheet" id="cs-modal" role="dialog" aria-modal="true" aria-label="Case study" hidden>
+    <div class="cs-sheet-handle" aria-hidden="true"></div>
+    <div class="cs-sheet-body" id="cs-modal-body" aria-busy="true">
+      <div class="cs-sheet-loading">Loading…</div>
+    </div>
+  </div>
+
+  <style>
+    /* Hero — single editorial statement, display-tier */
+    r-grid.main > r-cell > h1.hero-statement {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.92;
+      letter-spacing: -0.055em;
+      font-weight: 400;
+      max-width: 100%;
+      margin: 0 0 var(--gap-tight);
+    }
+
+    /* Section headers — two-cell split h2 + meta label */
+    r-cell.section-head { margin-bottom: calc(var(--unit) * 2); }
+    r-cell.section-head h2 { margin: 0; }
+    r-cell.section-head.meta {
+      font-size: var(--text-caption);
+      color: var(--foreground-color-dimmed);
+      text-align: right;
+      align-self: end;
+      padding-bottom: calc(var(--unit) * 0.75);
+    }
+    @media (max-width: 640px) {
+      r-cell.section-head.meta { text-align: left; padding-bottom: 0; }
+    }
+
+    r-cell.section-foot {
+      margin-top: calc(var(--unit) * 3);
+      margin-bottom: calc(var(--unit) * 6);
+    }
+
+    /* Selected work — humaan "What's New" carousel pattern */
+    r-cell.wn-section {
+      margin-top: 0;
+      margin-bottom: var(--gap-loose);
+    }
+    .wn-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: calc(var(--unit) * 4);
+    }
+    .wn-head-l {
+      display: flex;
+      align-items: baseline;
+      gap: 0.875rem;
+    }
+    .wn-count {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+    }
+    .wn-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-h1);
+      line-height: var(--leading-h);
+      letter-spacing: -0.035em;
+      font-weight: 400;
+      margin: 0;
+    }
+    .wn-controls {
+      display: inline-flex;
+      gap: 0.625rem;
+      flex-shrink: 0;
+    }
+    .wn-arrow {
+      all: unset;
+      cursor: pointer;
+      width: 3.25rem;
+      height: 3.25rem;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 1.5px solid var(--fg);
+      color: var(--fg);
+      font-size: var(--text-large);
+      transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
+    }
+    .wn-arrow:hover { background: var(--fg); color: var(--bg); }
+    .wn-arrow[disabled] { opacity: 0.25; cursor: default; }
+    .wn-arrow[disabled]:hover { background: transparent; color: var(--fg); }
+
+    .wn-track {
+      list-style: none;
+      /* Bleed the track to the right viewport edge so cards run off the page. */
+      margin: 0 calc(var(--site-edge) * -1) 0 0;
+      padding: 0 var(--site-edge) 1rem 0;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: clamp(17rem, 22vw, 22rem);
+      gap: 1.25rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: 0;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .wn-track::-webkit-scrollbar { display: none; }
+    .wn-card { scroll-snap-align: start; }
+    .wn-card a {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .wn-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 5; /* portrait, matches humaan */
+      background: var(--wn-fill);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .wn-card a:hover .wn-thumb { transform: translateY(-4px); }
+    .wn-pills {
+      position: absolute;
+      left: 0.875rem;
+      bottom: 0.875rem;
+      display: flex;
+      gap: 0.375rem;
+      flex-wrap: wrap;
+    }
+    .wn-name,
+    .wn-tag {
+      padding: 0.32rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.55);
+      color: rgba(255, 255, 255, 0.92);
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .wn-card-title {
+      margin: 1rem 0 0.5rem;
+      font-family: var(--titleFont);
+      font-size: var(--text-medium);
+      font-weight: 400;
+      line-height: 1.3;
+      letter-spacing: -0.005em;
+      color: rgba(var(--foreground-color-rgb), 0.65);
+    }
+    .wn-card-title strong {
+      color: var(--foreground-color);
+      font-weight: 600;
+    }
+    .wn-cta {
+      display: inline-block;
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: var(--foreground-color);
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 1px;
+      transition: opacity 160ms ease;
+    }
+    .wn-card a:hover .wn-cta { opacity: 0.65; }
+
+    @media (max-width: 640px) {
+      .wn-controls { display: none; }
+      .wn-track { grid-auto-columns: 78%; }
+    }
+
+    /* Case study sheet — slides up from the bottom, iOS-drawer style.
+       Expands to full-page when the user starts scrolling. */
+    .cs-sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(8, 12, 6, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: cs-sheet-fade 320ms ease;
+    }
+    .cs-sheet-backdrop[hidden] { display: none; }
+    .cs-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      z-index: 40;
+      width: 100%;
+      max-width: 100%;
+      height: 92vh;
+      max-height: 92vh;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vw, 1.5rem) 0 0;
+      background: var(--bg);
+      color: var(--foreground-color);
+      box-shadow: 0 -20px 60px -10px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      animation: cs-sheet-up 420ms cubic-bezier(0.32, 0.72, 0.24, 1);
+      transition: height 560ms cubic-bezier(0.22, 1, 0.36, 1),
+                  max-height 560ms cubic-bezier(0.22, 1, 0.36, 1),
+                  border-radius 560ms cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 560ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cs-sheet[hidden] { display: none; }
+    .cs-sheet.is-expanded {
+      height: 100vh;
+      max-height: 100vh;
+      border-radius: 0;
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+    .cs-sheet-handle::after {
+      transition: opacity 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cs-sheet.is-expanded .cs-sheet-handle::after { opacity: 0; }
+    .cs-sheet-body {
+      transition: height 560ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cs-sheet.is-expanded .cs-sheet-body {
+      height: calc(100vh - 2rem);
+    }
+    @keyframes cs-sheet-up {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    @keyframes cs-sheet-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes cs-sheet-down {
+      from { transform: translateY(0); }
+      to   { transform: translateY(100%); }
+    }
+    @keyframes cs-sheet-fade-out {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+    .cs-sheet.is-closing {
+      animation: cs-sheet-down 360ms cubic-bezier(0.32, 0.72, 0.24, 1) forwards;
+    }
+    .cs-sheet-backdrop.is-closing {
+      animation: cs-sheet-fade-out 320ms ease forwards;
+    }
+    .cs-sheet-handle {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      width: 100%;
+      padding: 0.75rem 0 0.5rem;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .cs-sheet-handle::after {
+      content: '';
+      width: 3rem;
+      height: 0.3125rem;
+      border-radius: 999px;
+      background: rgba(var(--foreground-color-rgb), 0.22);
+    }
+    .cs-sheet-body {
+      height: calc(92vh - 2rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .cs-sheet-loading {
+      display: grid;
+      place-items: center;
+      min-height: 50vh;
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+    }
+    .cs-sheet-close {
+      all: unset;
+      cursor: pointer;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 4;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #000;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      transition: background 160ms ease, transform 200ms ease;
+    }
+    .cs-sheet-close:hover { background: #fff; transform: scale(1.05); }
+    /* Strip outer chrome on the embedded case study and hide its prev/next foot */
+    .cs-sheet-body :global(.cs) {
+      padding: clamp(1.5rem, 3vw, 3rem) clamp(1.25rem, 3vw, 2.5rem) clamp(2rem, 4vw, 3rem);
+    }
+    .cs-sheet-body :global(.cs-foot) { display: none; }
+    /* Lock body scroll while sheet is open */
+    :global(body.cs-modal-open) { overflow: hidden; }
+    @media (prefers-reduced-motion: reduce) {
+      .cs-sheet,
+      .cs-sheet-backdrop { animation: none; }
+    }
+
+    /* Bio — full-width white card, avatar + headline + first paragraph + button */
+    r-cell.bio-section {
+      margin-top: 0;
+      margin-bottom: var(--gap-loose);
+    }
+    .bio-card {
+      display: block;
+      width: 100%;
+      background: #ffffff;
+      border-radius: clamp(1rem, 2vw, 1.5rem);
+      padding: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 6vw, 5rem) clamp(2.5rem, 5vw, 4rem);
+      box-sizing: border-box;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .bio-headline {
+      font-family: var(--titleFont);
+      font-size: var(--text-h1);
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      font-weight: 400;
+      color: var(--foreground-color);
+      margin: 0 0 clamp(2rem, 4vw, 3rem);
+    }
+    .bio-highlight {
+      color: var(--accent);
+      transition: opacity 240ms ease;
+      display: inline-block;
+    }
+    .bio-highlight.is-fade { opacity: 0; }
+
+    /* Image tile strip — irregular widths, full-width row, fixed height */
+    .bio-tiles {
+      list-style: none;
+      margin: 0 0 clamp(2rem, 4vw, 3rem);
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1.4fr 1.1fr 1fr;
+      grid-auto-rows: clamp(16rem, 26vw, 24rem);
+      gap: clamp(0.625rem, 1vw, 1rem);
+    }
+    .bio-tile {
+      position: relative;
+      height: 100%;
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 240ms ease;
+    }
+    .bio-tile:hover {
+      transform: rotate(var(--tilt, 0deg)) translateY(-6px);
+      box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.18);
+      z-index: 2;
+    }
+    .bio-tile-cap {
+      position: absolute;
+      left: 0.75rem;
+      bottom: 0.75rem;
+      padding: 0.25rem 0.625rem;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: rgba(255, 255, 255, 0.92);
+      font-family: var(--sansFont);
+      font-size: var(--text-micro);
+      letter-spacing: 0.02em;
+      border-radius: 999px;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 200ms ease, transform 200ms ease;
+      pointer-events: none;
+    }
+    .bio-tile:hover .bio-tile-cap {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .bio-tile--photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .bio-tile--shape-1 { background: #e8e0f5; }
+    .bio-tile--shape-2 { background: #f5e6d6; }
+    .bio-tile--shape-3 { background: #d9e8e0; }
+    .bio-tile--shape-4 { background: #ece5d4; }
+    @media (max-width: 760px) {
+      .bio-tiles { grid-template-columns: repeat(2, 1fr); }
+    }
+    .bio-lede {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.62);
+      margin: 0 0 clamp(2rem, 4vw, 3rem);
+    }
+    .bio-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5em;
+      padding: 0.875rem 1.5rem;
+      background: var(--fg);
+      color: var(--bg);
+      border-radius: 999px;
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      text-decoration: none;
+      transition: opacity 160ms ease, transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .bio-button:hover { opacity: 0.85; }
+    .bio-button-arrow { transition: transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+    .bio-button:hover .bio-button-arrow { transform: scale(1.08); }
+    .bio-card > .bio-button {
+      margin-top: clamp(2rem, 4vw, 3rem);
+      cursor: pointer;
+    }
+    .bio-button-arrow {
+      display: inline-grid;
+      place-items: center;
+    }
+    .bio-arrow-v {
+      transform-origin: center;
+      transition: opacity 220ms ease, transform 280ms cubic-bezier(0.32, 0.72, 0.24, 1);
+    }
+    .bio-card.is-expanded .bio-arrow-v {
+      opacity: 0;
+      transform: rotate(90deg) scale(0.4);
+    }
+
+    /* Expandable extra bio — accordion: content unfolds between tiles and button */
+    .bio-extra {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition:
+        grid-template-rows 420ms cubic-bezier(0.32, 0.72, 0.24, 1),
+        opacity 280ms ease;
+    }
+    .bio-card.is-expanded .bio-extra {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      transition:
+        grid-template-rows 420ms cubic-bezier(0.32, 0.72, 0.24, 1),
+        opacity 320ms ease 100ms;
+    }
+    .bio-extra-inner {
+      overflow: hidden;
+      max-width: 70ch;
+    }
+    .bio-extra-inner p {
+      font-family: var(--sansFont);
+      font-size: var(--text-h5);
+      line-height: 1.45;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      margin: 0 0 1.25em;
+    }
+    .bio-extra-inner p:first-child { margin-top: clamp(2rem, 4vw, 3rem); }
+    .bio-extra-inner p:last-child { margin-bottom: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bio-tile, .bio-tile-cap, .bio-extra { transition: none; }
+    }
+  </style>
+
+  <script is:inline>
+    // Case study modal — singleton bound once, queries DOM lazily so it survives ClientRouter swaps.
+    (() => {
+      if (window.__csModalInit) return;
+      window.__csModalInit = true;
+
+      const cache = new Map();
+      const state = { lastUrl: location.href, isOpen: false };
+
+      const getModal = () => document.getElementById('cs-modal');
+      const getBackdrop = () => document.getElementById('cs-modal-backdrop');
+      const getBody = () => document.getElementById('cs-modal-body');
+      const getPill = () => $('.site-pill');
+
+      const setPostMode = (title) => {
+        const html = document.documentElement;
+        html.dataset.postTitle = title || '';
+        html.dataset.backLabel = 'Work';
+        html.dataset.backHref = '/';
+        if (window.__syncSitePill) window.__syncSitePill();
+      };
+
+      const clearPostMode = () => {
+        const html = document.documentElement;
+        delete html.dataset.postTitle;
+        delete html.dataset.backLabel;
+        delete html.dataset.backHref;
+        if (window.__syncSitePill) window.__syncSitePill();
+      };
+
+      const open = async (href) => {
+        const modal = getModal();
+        const backdrop = getBackdrop();
+        const body = getBody();
+        const pill = getPill();
+        if (!modal || !backdrop || !body || !pill) return;
+
+        body.setAttribute('aria-busy', 'true');
+        body.innerHTML = '<div class="cs-modal-loading">Loading…</div>';
+        modal.hidden = false;
+        backdrop.hidden = false;
+        document.body.classList.add('cs-modal-open');
+        state.isOpen = true;
+        setPostMode('');
+        history.pushState({ caseStudy: href }, '', href);
+        try {
+          let html = cache.get(href);
+          if (!html) {
+            const res = await fetch(href, { headers: { 'X-Modal': '1' } });
+            html = await res.text();
+            cache.set(href, html);
+          }
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const article = doc.querySelector('article.cs');
+          if (!article) throw new Error('No case study content found');
+          const root = doc.documentElement;
+          const palette = root.getAttribute('style');
+          if (palette) {
+            modal.setAttribute('style', palette);
+            const pillNow = getPill();
+            if (pillNow) pillNow.setAttribute('style', palette);
+          }
+          body.innerHTML = '';
+          body.appendChild(article);
+          body.setAttribute('aria-busy', 'false');
+          body.scrollTop = 0;
+          const csTitle = article.querySelector('.cs-title');
+          setPostMode(csTitle ? csTitle.textContent : '');
+        } catch (err) {
+          body.innerHTML = '<div class="cs-modal-loading">Couldn\'t load. <a href="' + href + '">Open the page</a> instead.</div>';
+          body.setAttribute('aria-busy', 'false');
+        }
+      };
+
+      const close = (opts = {}) => {
+        const modal = getModal();
+        const backdrop = getBackdrop();
+        const wasOpen = state.isOpen;
+        const finalize = () => {
+          if (modal) {
+            modal.hidden = true;
+            modal.removeAttribute('style');
+            modal.classList.remove('is-expanded', 'is-closing');
+          }
+          if (backdrop) {
+            backdrop.hidden = true;
+            backdrop.classList.remove('is-closing');
+          }
+          document.body.classList.remove('cs-modal-open');
+          clearPostMode();
+          if (wasOpen && !opts.silent && location.href !== state.lastUrl) {
+            history.pushState({}, '', state.lastUrl);
+          }
+        };
+        state.isOpen = false;
+        if (!modal || modal.hidden || opts.immediate) {
+          finalize();
+          return;
+        }
+        modal.classList.add('is-closing');
+        if (backdrop) backdrop.classList.add('is-closing');
+        const onEnd = () => {
+          modal.removeEventListener('animationend', onEnd);
+          finalize();
+        };
+        modal.addEventListener('animationend', onEnd);
+        // Safety net in case animationend doesn't fire
+        setTimeout(() => {
+          if (modal.classList.contains('is-closing')) {
+            modal.removeEventListener('animationend', onEnd);
+            finalize();
+          }
+        }, 500);
+      };
+
+      // Delegated handlers on document — survive any DOM swap
+      document.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        // Card click — open modal
+        const card = e.target.closest('.wn-card a');
+        if (card) {
+          e.preventDefault();
+          e.stopPropagation();
+          state.lastUrl = location.href;
+          open(card.getAttribute('href'));
+          return;
+        }
+        // Back-button in pill — when modal is open, close it instead of navigating
+        if (state.isOpen && e.target.closest('[data-pill-back], [data-cs-modal-close]')) {
+          e.preventDefault();
+          e.stopPropagation();
+          close();
+          return;
+        }
+        // Anywhere outside the sheet (including nav, time clock, footer, backdrop) — close
+        if (state.isOpen && !e.target.closest('#cs-modal')) {
+          close();
+        }
+      }, true);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && state.isOpen) {
+          e.preventDefault();
+          close();
+        }
+      });
+
+      window.addEventListener('popstate', () => {
+        if (state.isOpen) close({ silent: true });
+      });
+
+      // Astro client-side navigation — close modal & restore pill before page swap
+      document.addEventListener('astro:before-preparation', () => {
+        if (state.isOpen) close({ silent: true, immediate: true });
+        else if (getPill() && getPill().classList.contains('site-pill--post')) restorePill();
+      });
+
+      // After every page swap, ensure pill is in correct state
+      document.addEventListener('astro:after-swap', () => {
+        const pill = getPill();
+        if (!pill) return;
+        if (!state.isOpen && pill.classList.contains('site-pill--post')) restorePill();
+        // Wire scroll-driven sheet expansion when the home page renders the modal again
+        const body = getBody();
+        const modal = getModal();
+        if (body && modal && !body.dataset.csScrollWired) {
+          wireScroll(body, modal);
+        }
+      });
+
+      // Expand sheet to full page on inner scroll
+      const wireScroll = (body, modal) => {
+        const EXPAND_AT = 30;
+        const COLLAPSE_AT = 4;
+        body.addEventListener('scroll', () => {
+          const y = body.scrollTop;
+          if (y > EXPAND_AT && !modal.classList.contains('is-expanded')) {
+            modal.classList.add('is-expanded');
+          } else if (y < COLLAPSE_AT && modal.classList.contains('is-expanded')) {
+            modal.classList.remove('is-expanded');
+          }
+        }, { passive: true });
+        body.dataset.csScrollWired = '1';
+      };
+      const initialBody = getBody();
+      const initialModal = getModal();
+      if (initialBody && initialModal) wireScroll(initialBody, initialModal);
+    })();
+  </script>
+
+  <script is:inline>
+    (() => {
+      // Per-tile tilt
+      document.querySelectorAll('.bio-tile[data-tilt]').forEach((el) => {
+        el.style.setProperty('--tilt', `${el.getAttribute('data-tilt')}deg`);
+      });
+      // Expand/collapse the bio in place
+      const btn = document.getElementById('bio-toggle');
+      const card = btn?.closest('.bio-card');
+      const extra = document.getElementById('bio-extra');
+      const label = btn?.querySelector('.bio-button-label');
+      if (btn && card && extra && label) {
+        btn.addEventListener('click', () => {
+          const open = !card.classList.contains('is-expanded');
+          card.classList.toggle('is-expanded', open);
+          btn.setAttribute('aria-expanded', String(open));
+          extra.setAttribute('aria-hidden', String(!open));
+          label.textContent = open ? 'Show less' : 'Read full bio';
+        });
+      }
+    })();
+  </script>
+
+  <script is:inline>
+    (() => {
+      const track = document.getElementById('wn-track');
+      if (!track) return;
+      const arrows = document.querySelectorAll('.wn-arrow');
+      const card = track.querySelector('.wn-card');
+      if (!card) return;
+      const step = () => card.getBoundingClientRect().width + 20; // card + gap
+      const update = () => {
+        const max = track.scrollWidth - track.clientWidth - 1;
+        arrows.forEach((a) => {
+          const dir = a.getAttribute('data-dir');
+          const disabled = (dir === 'prev' && track.scrollLeft <= 0) ||
+                           (dir === 'next' && track.scrollLeft >= max);
+          a.toggleAttribute('disabled', disabled);
+        });
+      };
+      arrows.forEach((a) => {
+        a.addEventListener('click', () => {
+          const dir = a.getAttribute('data-dir') === 'prev' ? -1 : 1;
+          track.scrollBy({ left: dir * step(), behavior: 'smooth' });
+        });
+      });
+      track.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    })();
+  </script>
+</Layout>

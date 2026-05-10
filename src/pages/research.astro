@@ -1,0 +1,218 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const entries = (await getCollection('research', (e) => e.data.published !== false))
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99) || b.data.year - a.data.year);
+
+const statusLabel = (s: 'ongoing' | 'complete' | 'paused' | undefined) =>
+  s === 'complete' ? 'Complete' : s === 'paused' ? 'Paused' : 'In progress';
+---
+<Layout
+  pageClass="research"
+  title="Research — Ayo Omole"
+  description="Threads Ayo Omole is currently pulling on — design methods, AI in security, and applied product work."
+>
+  <main class="rs">
+    <header class="rs-head">
+      <h1 class="rs-title">Research</h1>
+      <p class="rs-lede">
+        Threads I'm pulling on right now — explorations across AI, design methods, and applied product work. Mostly in progress.
+      </p>
+    </header>
+
+    {entries.length === 0 ? (
+      <p class="rs-empty">
+        No threads published yet. Check back soon, or <a href="mailto:hey@ayoomole.xyz">get in touch</a> if you'd like to discuss.
+      </p>
+    ) : (
+      <ul class="rs-list" aria-label="Research threads">
+        {entries.map((entry) => (
+          <li class="rs-row">
+            <div class="rs-row-l">
+              <h2 class="rs-row-title">
+                {entry.data.externalUrl ? (
+                  <a href={entry.data.externalUrl} target={entry.data.externalUrl.startsWith('mailto:') ? undefined : '_blank'} rel="noopener">{entry.data.title}</a>
+                ) : entry.data.status === 'complete' ? (
+                  <a href={`/research/${entry.data.slug}`}>{entry.data.title}</a>
+                ) : (
+                  entry.data.title
+                )}
+              </h2>
+              <p class="rs-row-summary">{entry.data.summary}</p>
+              {entry.data.topic && <span class="rs-row-topic">{entry.data.topic}</span>}
+            </div>
+            <div class="rs-row-r">
+              {entry.data.externalUrl ? (
+                <a
+                  class={`rs-status rs-status--${entry.data.status ?? 'ongoing'} rs-status--link`}
+                  href={entry.data.externalUrl}
+                  target={entry.data.externalUrl.startsWith('mailto:') ? undefined : '_blank'}
+                  rel="noopener"
+                >
+                  Read paper
+                  <span class="rs-status-arrow" aria-hidden="true">&rarr;</span>
+                </a>
+              ) : (
+                <span class={`rs-status rs-status--${entry.data.status ?? 'ongoing'}`}>
+                  {statusLabel(entry.data.status)}
+                </span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
+  </main>
+
+  <style>
+    .rs {
+      max-width: var(--site-max-width);
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+    }
+
+    .rs-head {
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      max-width: 80%;
+    }
+    .rs-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.98;
+      letter-spacing: -0.025em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+    .rs-lede {
+      font-family: var(--titleFont);
+      font-size: var(--text-h4);
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      font-weight: 400;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      max-width: 60ch;
+      margin: 0;
+    }
+
+    .rs-empty {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      max-width: 60ch;
+    }
+    .rs-empty a {
+      color: var(--foreground-color);
+      border-bottom: 1px solid currentColor;
+      text-decoration: none;
+    }
+
+    /* List of research threads — each entry is its own white card */
+    .rs-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.875rem, 1.5vw, 1.25rem);
+    }
+    .rs-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      align-items: start;
+      padding: clamp(1.75rem, 3vw, 2.5rem) clamp(1.75rem, 3vw, 2.5rem);
+      background: #ffffff;
+      border-radius: clamp(1rem, 1.5vw, 1.25rem);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .rs-row-l { min-width: 0; }
+    .rs-row-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-h3);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      margin: 0 0 0.5rem;
+    }
+    .rs-row-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: opacity 160ms ease;
+    }
+    .rs-row-title a:hover { opacity: 0.7; }
+    .rs-row-summary {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.45;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      margin: 0 0 0.875rem;
+      max-width: 60ch;
+    }
+    .rs-row-topic {
+      display: inline-block;
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+    }
+
+    /* Status pill — colored by section accent */
+    .rs-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5em;
+      padding: 0.4rem 0.875rem;
+      border-radius: 999px;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      font-weight: 500;
+      white-space: nowrap;
+      text-decoration: none;
+      transition: opacity 160ms ease, transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .rs-status--link { cursor: pointer; }
+    .rs-status--link::before { display: none; }
+    .rs-status--link:hover { opacity: 0.85; }
+    .rs-status-arrow {
+      display: inline-block;
+      transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .rs-status--link:hover .rs-status-arrow { transform: translateX(0.25em); }
+    .rs-status::before {
+      content: '';
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .rs-status--ongoing::before { animation: rs-status-pulse 2.4s ease-in-out infinite; }
+    .rs-status--complete {
+      background: transparent;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.25);
+    }
+    .rs-status--paused {
+      background: transparent;
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.18);
+    }
+    @keyframes rs-status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.45; transform: scale(0.85); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rs-status--ongoing::before { animation: none; }
+    }
+
+    @media (max-width: 640px) {
+      .rs-head { max-width: 100%; }
+      .rs-row { grid-template-columns: 1fr; }
+      .rs-row-r { justify-self: start; }
+    }
+  </style>
+</Layout>

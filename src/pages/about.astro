@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Ayo Omole',
+  jobTitle: 'Senior Product Designer',
+  url: 'https://ayoomole.xyz',
+  sameAs: ['https://linkedin.com/in/ayoomole'],
+  worksFor: { '@type': 'Organization', name: 'ThreatDown by Malwarebytes' },
+  alumniOf: { '@type': 'Organization', name: 'University of Tartu' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Tallinn', addressCountry: 'EE' },
+};
+---
+<Layout
+  pageClass="about"
+  title="About — Ayo Omole"
+  description="Senior product designer based in Tallinn. Born in Nigeria. Advising first-time founders on product strategy."
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(personLd)} />
+
+  <r-grid class="main" columns="6" columns-s="4" columns-xs="2">
+
+    <r-cell order="-10" span="4" span-s="2">
+      <h1>Hey</h1>
+    </r-cell>
+
+
+    <r-cell span="3" span-s="2" span-xs="row" class="intro">
+      <p>My name is Ayo Omole. I'm a Nigerian he/him living in Tallinn, Estonia. Product design is the medium through which I make complex systems feel obvious.</p>
+
+      <p>I specialize in simplifying complex systems and designing products that scale across diverse markets — fintech, enterprise operations, logistics — from early concept exploration to high-fidelity delivery.<br />
+      <a href="/#work">Read about my work &rarr;</a></p>
+
+      <p>I hold a Master's in Human Computer Interaction from the University of Tartu, where I built a foundation in user behaviour, accessibility, and evidence-based design. Outside of work I advise first-time founders on early product strategy and explore filmmaking as a way to understand narrative and engagement.</p>
+
+      <p>I care about products that matter, teams that collaborate well, and design that empowers people — no matter where they are in the world.</p>
+    </r-cell>
+
+    <r-cell span="2" span-s="2" span-xs="row" class="bio">
+      <img src="/portrait.jpg" alt="Portrait of Ayo Omole" width="320" height="320" />
+      <div class="link-list">
+        <a href="mailto:hey@ayoomole.xyz">Email &rarr;</a>
+        <a href="https://linkedin.com/in/ayoomole">LinkedIn &rarr;</a>
+        <a href="/resume.pdf">Résumé (PDF) &rarr;</a>
+        <a href="/rss.xml">RSS &rarr;</a>
+      </div>
+    </r-cell>
+
+    <r-cell span="row" class="tidbit">
+      <h2 id="advisory"><a href="#advisory">Advisory</a></h2>
+      <p>I take on one or two advisory engagements at a time with early-stage founders. Most useful on product strategy, 0→1 exploration, and design hiring. Not a fit for later-stage growth or brand work.</p>
+    </r-cell>
+
+    <r-cell span="row" class="tidbit" id="book">
+      <h2><a href="#book">Book a conversation</a></h2>
+      <p>Use the scheduler below, or email <a href="mailto:hey@ayoomole.xyz">hey@ayoomole.xyz</a>.</p>
+      <p class="dimmed">Calendar embed goes here — Google Calendar Appointment Scheduling link pending.</p>
+    </r-cell>
+
+  </r-grid>
+</Layout>

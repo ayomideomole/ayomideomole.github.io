@@ -1,0 +1,141 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const work = (await getCollection('work', (e) => e.data.published !== false))
+  .sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+
+const years = work.map((w) => w.data.year).sort();
+const yearRange = years.length ? `${years[0]}–${years[years.length - 1]}` : '';
+---
+<Layout
+  pageClass="work"
+  title="Work — Ayo Omole"
+  description="Selected case studies from Ayo Omole — product design across fintech, enterprise security, and platform tooling."
+>
+  <r-grid class="main" columns="6" columns-s="4" columns-xs="2">
+
+    <r-cell order="-10" span="4" span-s="2">
+      <h1>Work</h1>
+    </r-cell>
+
+
+    <r-cell class="statement" span="row">
+      <p>
+        A selection of case studies from the past few years —
+        fintech, enterprise security, and platform tooling.
+        Older and confidential work available on request.
+      </p>
+    </r-cell>
+
+    <hr />
+
+    <r-cell span="4" span-s="2" class="section-head">
+      <h2 id="case-studies"><a href="#case-studies">Case studies</a></h2>
+    </r-cell>
+    <r-cell span="2" span-s="2" class="section-head meta">
+      <span class="mono">{yearRange} · {work.length} case studies</span>
+    </r-cell>
+
+    {work.map((entry) => (
+      <r-cell class="workrow" span="row">
+        <a class="workrow-link" href={`/${entry.data.slug}`}>
+          <span class="year mono">{entry.data.year}</span>
+          <span class="company">{entry.data.company}</span>
+          <span class="role">{entry.data.role}</span>
+          <span class="cta mono">Case study &rarr;</span>
+        </a>
+      </r-cell>
+    ))}
+
+    <r-cell span="row" class="section-foot">
+      <a href="/about/" class="dimmed">Full experience on request &rarr;</a>
+    </r-cell>
+
+  </r-grid>
+
+  <style>
+    r-cell.statement {
+      margin-top: calc(var(--unit) * 4);
+      margin-bottom: calc(var(--unit) * 6);
+    }
+    r-cell.statement p {
+      font-family: var(--titleFont);
+      font-weight: 500;
+      font-size: var(--text-h5);
+      line-height: 1.3;
+      letter-spacing: -0.005em;
+      max-width: 44ch;
+      color: var(--foreground-color-dimmed);
+    }
+
+    r-cell.section-head { margin-bottom: calc(var(--unit) * 2); }
+    r-cell.section-head h2 { margin: 0; }
+    r-cell.section-head.meta {
+      font-size: var(--text-caption);
+      color: var(--foreground-color-dimmed);
+      text-align: right;
+      align-self: end;
+      padding-bottom: calc(var(--unit) * 0.75);
+    }
+    @media (max-width: 640px) {
+      r-cell.section-head.meta { text-align: left; padding-bottom: 0; }
+    }
+
+    r-cell.workrow {
+      border-top: var(--pixel) solid rgba(var(--foreground-color-rgb), 0.15);
+    }
+    r-cell.workrow:last-of-type {
+      border-bottom: var(--pixel) solid rgba(var(--foreground-color-rgb), 0.15);
+    }
+    r-cell.workrow .workrow-link {
+      display: grid;
+      grid-template-columns: calc(var(--unit) * 8) minmax(0, 2fr) minmax(0, 3fr) auto;
+      gap: calc(var(--unit) * 4);
+      align-items: baseline;
+      padding: calc(var(--unit) * 2) 0;
+      color: inherit;
+      text-decoration: none;
+      transition: color 120ms ease;
+    }
+    r-cell.workrow .workrow-link:hover { color: var(--accent-color); text-decoration: none; }
+    r-cell.workrow .workrow-link:hover .year,
+    r-cell.workrow .workrow-link:hover .role,
+    r-cell.workrow .workrow-link:hover .cta { color: inherit; }
+
+    r-cell.workrow .year {
+      font-size: var(--text-caption);
+      color: var(--foreground-color-dimmed);
+      letter-spacing: 0.02em;
+    }
+    r-cell.workrow .company { font-weight: 500; font-size: var(--text-medium); }
+    r-cell.workrow .role { color: var(--foreground-color-dimmed); font-size: var(--text-small); }
+    r-cell.workrow .cta {
+      font-size: var(--text-micro);
+      color: var(--foreground-color-dimmed);
+      letter-spacing: 0.02em;
+      text-align: right;
+    }
+
+    @media (max-width: 1024px) {
+      r-cell.workrow .workrow-link {
+        grid-template-columns: calc(var(--unit) * 7) minmax(0, 1fr);
+        grid-template-areas:
+          "year company"
+          ".    role"
+          ".    cta";
+        row-gap: calc(var(--unit) * 0.5);
+        gap: calc(var(--unit) * 2);
+      }
+      r-cell.workrow .year { grid-area: year; }
+      r-cell.workrow .company { grid-area: company; }
+      r-cell.workrow .role { grid-area: role; }
+      r-cell.workrow .cta { grid-area: cta; text-align: left; }
+    }
+
+    r-cell.section-foot {
+      margin-top: calc(var(--unit) * 3);
+      margin-bottom: calc(var(--unit) * 6);
+    }
+  </style>
+</Layout>

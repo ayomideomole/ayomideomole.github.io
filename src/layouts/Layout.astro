@@ -1,0 +1,814 @@
+---
+import '../styles/rsms-base.css';
+import '../styles/case-study.css';
+import { ClientRouter } from 'astro:transitions';
+
+interface Palette {
+  bg: string;
+  fg: string;
+  accent: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  pageClass: 'home' | 'about' | 'archive' | 'post' | 'workpage' | 'work' | 'research' | 'notes';
+  ogImage?: string;
+  canonicalUrl?: string;
+  palette?: Palette;
+  postTitle?: string;
+  backLabel?: string;
+  backHref?: string;
+  hideFooter?: boolean;
+}
+
+const {
+  title,
+  description = '',
+  pageClass,
+  ogImage = '/og-default.png',
+  canonicalUrl,
+  palette,
+  postTitle,
+  backLabel = 'Notes',
+  backHref = '/notes/',
+  hideFooter = false,
+} = Astro.props;
+
+const inDetailMode = Boolean(postTitle);
+
+const site = Astro.site ?? new URL('https://ayoomole.xyz');
+const canonical = canonicalUrl ?? new URL(Astro.url.pathname, site).toString();
+
+const hexToRgb = (hex: string) => {
+  const h = hex.replace('#', '');
+  const v = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  return `${parseInt(v.slice(0, 2), 16)}, ${parseInt(v.slice(2, 4), 16)}, ${parseInt(v.slice(4, 6), 16)}`;
+};
+
+// Token contract: derive 11 design tokens from 3 anchor colors.
+// Surfaces use color-mix in oklab; text/border tiers use alpha-of-fg.
+const paletteVars = (p: Palette) => {
+  const fgRgb = hexToRgb(p.fg);
+  return [
+    `--bg:${p.bg}`,
+    `--fg:${p.fg}`,
+    `--accent:${p.accent}`,
+    `--surface-1:${p.bg}`,
+    `--surface-2:color-mix(in oklab, ${p.bg} 96%, ${p.fg})`,
+    `--surface-3:color-mix(in oklab, ${p.bg} 92%, ${p.fg})`,
+    `--text-1:${p.fg}`,
+    `--text-2:rgba(${fgRgb}, 0.72)`,
+    `--text-3:rgba(${fgRgb}, 0.5)`,
+    `--text-4:rgba(${fgRgb}, 0.32)`,
+    `--border-1:rgba(${fgRgb}, 0.14)`,
+    `--border-2:rgba(${fgRgb}, 0.28)`,
+    `--accent-hover:color-mix(in oklab, ${p.accent}, ${p.fg} 18%)`,
+    `--accent-bright:color-mix(in oklab, ${p.accent}, white 38%)`,
+    `--accent-on:${p.bg}`,
+    `--focus-ring:color-mix(in oklab, ${p.accent}, transparent 60%)`,
+    // Legacy aliases for rsms-base + existing components
+    `--background-color:${p.bg}`,
+    `--letterbox-color:${p.bg}`,
+    `--foreground-color:${p.fg}`,
+    `--foreground-color-rgb:${fgRgb}`,
+    `--hot-orange:${p.accent}`,
+    `--accent-color:${p.accent}`,
+  ].join(';') + ';';
+};
+
+const paletteStyle = palette ? paletteVars(palette) : undefined;
+---
+<!DOCTYPE html>
+<html
+  lang="en"
+  prefix="og:http://ogp.me/ns#"
+  class={pageClass}
+  style={paletteStyle}
+  data-post-title={inDetailMode ? postTitle : undefined}
+  data-back-label={inDetailMode ? backLabel : undefined}
+  data-back-href={inDetailMode ? backHref : undefined}
+>
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <ClientRouter />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter-display.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+    <style is:global>
+      /* PP Neue Montreal — self-hosted (Pangram Pangram, Free for Personal Use v3.0). */
+      @font-face {
+        font-family: 'PP Neue Montreal';
+        src: url('/fonts/PPNeueMontreal-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'PP Neue Montreal';
+        src: url('/fonts/PPNeueMontreal-Semibold.woff2') format('woff2');
+        font-weight: 500 600;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'PP Neue Montreal';
+        src: url('/fonts/PPNeueMontreal-Extrabold.woff2') format('woff2');
+        font-weight: 700 800;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Untitled Serif — variable, self-hosted (Klim test fonts; license for production). */
+      @font-face {
+        font-family: 'Untitled Serif';
+        src: url('/fonts/UntitledSerif-Variable.woff2') format('woff2-variations'),
+             url('/fonts/UntitledSerif-Variable.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Untitled Serif';
+        src: url('/fonts/UntitledSerif-VariableItalic.woff2') format('woff2-variations'),
+             url('/fonts/UntitledSerif-VariableItalic.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: italic;
+        font-display: swap;
+      }
+    </style>
+    <link rel="alternate" type="application/rss+xml" title="Ayo Omole — notes" href="/rss.xml" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(ogImage, site).toString()} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      try {
+        const m = localStorage.getItem('motion');
+        if (m) document.documentElement.setAttribute('data-motion', m);
+      } catch {}
+    </script>
+    <script is:inline>
+      // Toggle nav state once scrolled past a small threshold; only the pill remains.
+      (() => {
+        const TH = 32;
+        const apply = () => {
+          const nav = document.querySelector('.site-nav');
+          if (!nav) return;
+          nav.classList.toggle('is-scrolled', window.scrollY > TH);
+        };
+        const start = () => { apply(); window.addEventListener('scroll', apply, { passive: true }); };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+        else start();
+      })();
+    </script>
+    <script is:inline>
+      // Live local time + zone label in the nav capsule. No theme switching.
+      (() => {
+        const fmtTime = () => new Date().toLocaleTimeString([], {
+          hour: '2-digit', minute: '2-digit', hour12: false,
+        });
+        const getZoneLabel = () => {
+          try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+            if (tz) {
+              const city = tz.split('/').pop() || tz;
+              return city.replace(/_/g, ' ');
+            }
+          } catch {}
+          const off = -new Date().getTimezoneOffset();
+          const sign = off >= 0 ? '+' : '−';
+          const hh = String(Math.floor(Math.abs(off) / 60)).padStart(2, '0');
+          const mm = String(Math.abs(off) % 60).padStart(2, '0');
+          return `GMT${sign}${hh}:${mm}`;
+        };
+        const tick = () => {
+          const clock = document.querySelector('[data-local-time]');
+          const zone = document.querySelector('[data-local-zone]');
+          if (clock) clock.textContent = fmtTime();
+          if (zone) zone.textContent = getZoneLabel();
+        };
+        const start = () => {
+          tick();
+          setInterval(tick, 30 * 1000);
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+        else start();
+      })();
+    </script>
+    <script is:inline>
+      // Unified pill-state controller — keeps the persisted nav pill in sync with html attributes.
+      (() => {
+        if (window.__sitePillSync) return;
+        window.__sitePillSync = true;
+
+        const SECTION_HTML =
+          '<span class="site-pill-indicator" aria-hidden="true"></span>' +
+          '<a href="/" data-section="home">Home</a>' +
+          '<a href="/research/" data-section="research">Research</a>' +
+          '<a href="/notes/" data-section="notes">Notes</a>';
+
+        const sync = (opts = {}) => {
+          const pill = document.querySelector('.site-pill');
+          if (!pill) return;
+          const html = document.documentElement;
+          const postTitle = html.dataset.postTitle;
+          const backLabel = html.dataset.backLabel || 'Notes';
+          const backHref = html.dataset.backHref || '/notes/';
+          const wantPost = !!postTitle;
+          const isPost = pill.classList.contains('site-pill--post');
+
+          if (wantPost) {
+            pill.classList.add('site-pill--post');
+            pill.setAttribute('aria-label', 'Page');
+            pill.innerHTML =
+              `<a href="${backHref}" class="site-pill-back" data-pill-back><span aria-hidden="true">←</span> ${backLabel}</a>` +
+              `<span class="site-pill-active" aria-current="page">${postTitle}</span>`;
+            if (!opts.skipAnim) {
+              pill.classList.add('is-entering');
+              requestAnimationFrame(() => requestAnimationFrame(() => pill.classList.remove('is-entering')));
+            }
+          } else {
+            pill.classList.remove('site-pill--post');
+            pill.setAttribute('aria-label', 'Sections');
+            pill.removeAttribute('style');
+            pill.innerHTML = SECTION_HTML;
+            if (!opts.skipAnim && isPost) {
+              pill.classList.add('is-entering');
+              requestAnimationFrame(() => requestAnimationFrame(() => pill.classList.remove('is-entering')));
+            }
+            // Re-fire indicator init
+            document.dispatchEvent(new Event('site-pill:reposition'));
+          }
+        };
+
+        window.__syncSitePill = sync;
+        const init = () => sync({ skipAnim: true });
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+        document.addEventListener('astro:after-swap', () => sync());
+      })();
+    </script>
+    <script is:inline>
+      // Sliding active-pill indicator.
+      (() => {
+        const positionTo = (indicator, link) => {
+          if (!indicator || !link) return;
+          const navRect = link.parentElement.getBoundingClientRect();
+          const r = link.getBoundingClientRect();
+          const x = r.left - navRect.left;
+          indicator.style.width = r.width + 'px';
+          indicator.style.transform = `translate3d(${x}px, -50%, 0)`;
+        };
+        const setup = () => {
+          const pill = document.querySelector('.site-pill');
+          const indicator = pill && pill.querySelector('.site-pill-indicator');
+          if (!pill || !indicator) return;
+          const links = pill.querySelectorAll('a[data-section]');
+          const cls = document.documentElement.className;
+          const findActive = () => {
+            for (const a of links) {
+              const sec = a.getAttribute('data-section');
+              if (cls.includes(sec) || (sec === 'notes' && (cls.includes('archive') || cls.includes('post'))) || (sec === 'work' && cls.includes('workpage'))) {
+                return a;
+              }
+            }
+            return null;
+          };
+          const active = findActive();
+          if (!active) { indicator.classList.remove('is-ready'); return; }
+          // Position without animation on first load
+          const wasReady = indicator.classList.contains('is-ready');
+          if (!wasReady) {
+            indicator.style.transition = 'none';
+            positionTo(indicator, active);
+            requestAnimationFrame(() => {
+              indicator.style.transition = '';
+              indicator.classList.add('is-ready');
+            });
+          } else {
+            positionTo(indicator, active);
+          }
+          // Glide on click — kicks off before navigation completes
+          links.forEach((l) => {
+            l.addEventListener('click', () => positionTo(indicator, l));
+          });
+          // Re-measure on resize
+          if (!pill.dataset.resizeWired) {
+            window.addEventListener('resize', () => {
+              const a = findActive();
+              if (a) positionTo(indicator, a);
+            });
+            pill.dataset.resizeWired = '1';
+          }
+        };
+        const init = () => setup();
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+        document.addEventListener('astro:after-swap', init);
+        document.addEventListener('site-pill:reposition', init);
+      })();
+    </script>
+    <script async src="/rsms-main.js"></script>
+    <slot name="head" />
+    <style is:global>
+      :root {
+        --body-max-width: none;
+        --body-bleed: 0px;
+        --hr-weight: 1px;
+        /* Unified site container — full-width with consistent edge padding. */
+        --site-max-width: 100%;
+        --site-edge: clamp(1.25rem, 3vw, 2.5rem);
+
+        /* Vertical rhythm — two tokens applied as margin-bottom on each section.
+           tight = related blocks (e.g. hero → carousel)
+           loose = unrelated blocks (e.g. carousel → bio, bio → footer) */
+        --gap-tight: clamp(2rem, 4vw, 4rem);
+        --gap-loose: clamp(4rem, 10vw, 8rem);
+        --titleFont: 'Untitled Serif', 'PP Neue Montreal', 'Inter', Georgia, serif;
+        --sansFont: 'Inter var', 'Inter', system-ui, sans-serif;
+
+        /* Type scale — humaan-style fluid clamps. Single 1.33x growth factor.
+           Anchor design width: ~1512px. Below clamps to min, above clamps to max. */
+        --text-display: clamp(2.5rem, 8.4vw, 7.5rem);       /* hero: 40→120px */
+        --text-h1:      clamp(3.125rem, 5.2vw, 4.15625rem); /* 50→66px */
+        --text-h2:      clamp(2.5rem, 4.16vw, 3.325rem);    /* 40→53px */
+        --text-h3:      clamp(2.1875rem, 3.65vw, 2.90938rem); /* 35→47px */
+        --text-h4:      clamp(1.75rem, 2.92vw, 2.3275rem);  /* 28→37px */
+        --text-h5:      clamp(1.5rem, 2.5vw, 1.995rem);     /* 24→32px */
+        --text-large:   clamp(1.25rem, 2.08vw, 1.6625rem);  /* 20→27px */
+        --text-medium:  clamp(1.125rem, 1.875vw, 1.49625rem); /* 18→24px */
+        --text-body:    clamp(1rem, 1.66vw, 1.33rem);       /* 16→21px */
+        --text-small:   clamp(0.9375rem, 1.56vw, 1.24688rem);/* 15→20px */
+        --text-mini:    clamp(0.875rem, 1.45vw, 1.16375rem); /* 14→18.6px */
+        --text-caption: clamp(0.8125rem, 1.35vw, 1.08063rem);/* 13→17px */
+        --text-micro:   clamp(0.75rem, 1.25vw, 0.9975rem);   /* 12→16px */
+
+        /* Line-heights paired to scale tier */
+        --leading-display: 0.9;
+        --leading-h:       1.05;
+        --leading-lede:    1.3;
+        --leading-body:    1.55;
+      }
+      body { font-family: var(--sansFont); font-size: var(--text-body); line-height: var(--leading-body); }
+      h1, h2, h3, h4, h5 { font-family: var(--titleFont); font-weight: 400; line-height: var(--leading-h); }
+
+      html[data-motion="off"],
+      html[data-motion="off"] *,
+      html[data-motion="off"] *::before,
+      html[data-motion="off"] *::after {
+        animation-duration: 0.001ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        transition-delay: 0ms !important;
+        scroll-behavior: auto !important;
+      }
+      hr { background: rgba(var(--foreground-color-rgb), 0.5); }
+      body { box-shadow: none; }
+      html { background-color: var(--background-color); transition: background-color 200ms ease; }
+
+      /* Per-section palette — color as wayfinding.
+         Anchors authored: --bg, --fg, --accent (all AAA body, AA links).
+         All other tokens derived. See Layout.astro paletteVars(). */
+      :root.home,
+      :root.workpage {
+        --bg: #f3f3e9; --fg: #0f1d07;
+        --accent: color-mix(in oklab, #8efb6c, black 10%);
+        --accent-bright: #8efb6c;
+        --foreground-color-rgb: 15, 29, 7;
+      }
+      :root.about {
+        --bg: #f3e6e3; --fg: #1f1813; --accent: #8a2848;
+        --accent-bright: #ff8eb5;
+        --foreground-color-rgb: 31, 24, 19;
+      }
+      :root.work {
+        --bg: #e6e2d8; --fg: #1a1a18; --accent: #1f4a82;
+        --accent-bright: #5fb0ff;
+        --foreground-color-rgb: 26, 26, 24;
+      }
+      :root.archive,
+      :root.notes,
+      :root.post {
+        --bg: #e2eee6; --fg: #161a18; --accent: #1f5a3a;
+        --accent-bright: #6cf0a0;
+        --foreground-color-rgb: 22, 26, 24;
+      }
+      :root.research {
+        --bg: #ece4f0; --fg: #1a1620; --accent: #5a2880;
+        --accent-bright: #c97aff;
+        --foreground-color-rgb: 26, 22, 32;
+      }
+
+      /* Derived token contract (applies to every section + project pages) */
+      html {
+        --surface-1: var(--bg);
+        --surface-2: color-mix(in oklab, var(--bg) 96%, var(--fg));
+        --surface-3: color-mix(in oklab, var(--bg) 92%, var(--fg));
+        --text-1: var(--fg);
+        --text-2: color-mix(in oklab, var(--fg) 72%, var(--bg));
+        --text-3: color-mix(in oklab, var(--fg) 50%, var(--bg));
+        --text-4: color-mix(in oklab, var(--fg) 32%, var(--bg));
+        --border-1: color-mix(in oklab, var(--fg) 14%, var(--bg));
+        --border-2: color-mix(in oklab, var(--fg) 28%, var(--bg));
+        --accent-hover: color-mix(in oklab, var(--accent), var(--fg) 18%);
+        --accent-on: var(--bg);
+        --focus-ring: color-mix(in oklab, var(--accent), transparent 60%);
+      }
+
+      /* Legacy aliases — :root.<class> specificity matches rsms-base dark-mode overrides
+         and beats them by source order. */
+      :root.home, :root.workpage,
+      :root.about,
+      :root.work,
+      :root.archive, :root.notes, :root.post,
+      :root.research {
+        --background-color: var(--bg);
+        --letterbox-color: var(--bg);
+        --foreground-color: var(--fg);
+        --hot-orange: var(--accent);
+        --accent-color: var(--accent);
+      }
+      /* Defeat rsms-base prefers-color-scheme: dark overrides — site is all-light. */
+      @media (prefers-color-scheme: dark) {
+        :root.home, :root.workpage,
+        :root.about,
+        :root.work,
+        :root.archive, :root.notes, :root.post,
+        :root.research {
+          --background-color: var(--bg);
+          --letterbox-color: var(--bg);
+          --foreground-color: var(--fg);
+          --hot-orange: var(--accent);
+          --accent-color: var(--accent);
+        }
+      }
+
+      r-grid.main > r-cell > h1 {
+        font-size: var(--text-display);
+        line-height: var(--leading-display);
+        letter-spacing: -0.03em;
+        height: auto;
+      }
+      body { padding-top: calc(var(--unit) * 4); }
+      r-grid.main h1 { margin-top: calc(var(--unit) * 6); }
+      r-grid.main .menu { height: auto; padding-top: calc(var(--unit) * 4); }
+      r-grid.main .menu > div.focus0 { margin-top: calc(var(--unit) * 6); }
+      r-grid.main .menu > div.focus1 { margin-top: calc(var(--unit) * 4); }
+      r-grid.main .menu > div.focus2 { margin-top: calc(var(--unit) * 3); }
+      r-grid.main .menu > div.focus3 { margin-top: calc(var(--unit) * 2); }
+      r-grid.main .menu > div.focus4 { margin-top: calc(var(--unit) * 1); }
+      r-grid.main .menu > div.focus5 { margin-top: 0; }
+
+      /* Subtle editorial link treatment: wipe underline + trailing accent dot */
+      r-cell.statement p:not(.contacts) a,
+      r-cell.section-head h2 a,
+      r-grid.main r-cell > h3 > a,
+      r-cell.section-foot > a {
+        text-decoration: none;
+        background-image: linear-gradient(currentColor, currentColor);
+        background-position: 0 100%;
+        background-size: 0% var(--pixel);
+        background-repeat: no-repeat;
+        transition: background-size 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      r-cell.statement p:not(.contacts) a:hover,
+      r-cell.section-head h2 a:hover,
+      r-grid.main r-cell > h3 > a:hover,
+      r-cell.section-foot > a:hover {
+        background-size: 100% var(--pixel);
+      }
+      r-cell.statement p:not(.contacts) a::after,
+      r-grid.main r-cell > h3 > a::after,
+      r-cell.section-foot > a::after {
+        content: '';
+        display: inline-block;
+        width: 0;
+        height: 0.32em;
+        border-radius: 50%;
+        background: var(--hot-orange);
+        margin-left: 0;
+        vertical-align: 0.12em;
+        transform: scale(0);
+        transition: transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                    width 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
+                    margin-left 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      r-cell.statement p:not(.contacts) a:hover::after,
+      r-grid.main r-cell > h3 > a:hover::after,
+      r-cell.section-foot > a:hover::after {
+        transform: scale(1);
+        width: 0.32em;
+        margin-left: 0.45em;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        r-cell.statement p:not(.contacts) a,
+        r-cell.section-head h2 a,
+        r-grid.main r-cell > h3 > a,
+        r-cell.section-foot > a { transition: none; }
+      }
+
+      /* Top horizontal nav — mirroring humaan.com pattern.
+         Solid bg (matches page), 85px height, generous link spacing, no blur. */
+      .site-skip {
+        position: absolute;
+        left: 0; top: 0;
+        padding: 0.75rem 1rem;
+        background: var(--foreground-color);
+        color: var(--background-color);
+        text-decoration: none;
+        transform: translateY(-200%);
+        z-index: 100;
+      }
+      .site-skip:focus { transform: translateY(0); }
+
+      .site-nav {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        height: 5.75rem;
+        max-width: var(--site-max-width);
+        margin: 0 auto;
+        padding: 1.125rem var(--site-edge) 0.625rem;
+        box-sizing: border-box;
+        background: transparent;
+        font-family: var(--sansFont);
+        font-size: var(--text-mini);
+        font-weight: 500;
+        letter-spacing: -0.005em;
+      }
+      .site-pill,
+      .site-theme {
+        height: 2.625rem;
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
+      }
+
+      /* Pill capsule — solid white at top, frosted glass on scroll */
+      .site-pill {
+        position: relative;
+        gap: 0;
+        padding: 0 0.3125rem;
+        background: #ffffff;
+        border-radius: 999px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition: background 220ms ease, box-shadow 220ms ease, backdrop-filter 220ms ease;
+      }
+      .site-pill > * {
+        transition: opacity 280ms ease, transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .site-pill.is-entering > * {
+        opacity: 0;
+        transform: translateY(-6px);
+        transition: none;
+      }
+      .site-nav.is-scrolled .site-pill {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px) saturate(140%);
+        -webkit-backdrop-filter: blur(12px) saturate(140%);
+        box-shadow: 0 4px 18px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.03);
+      }
+      .site-pill > a {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        height: 2rem;
+        color: var(--text-2, rgba(var(--foreground-color-rgb), 0.62));
+        text-decoration: none;
+        padding: 0 0.875rem;
+        border-radius: 999px;
+        transition: color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .site-pill > a:hover { color: var(--foreground-color); }
+      /* Active section — text uses bright accent; the sliding indicator fills behind */
+      html.home     .site-pill a[data-section="home"],
+      html.work     .site-pill a[data-section="work"],
+      html.about    .site-pill a[data-section="about"],
+      html.research .site-pill a[data-section="research"],
+      html.notes    .site-pill a[data-section="notes"],
+      html.archive  .site-pill a[data-section="notes"],
+      html.post     .site-pill a[data-section="notes"],
+      html.workpage .site-pill a[data-section="work"] {
+        color: var(--accent-bright, var(--bg));
+      }
+      /* Sliding active indicator */
+      .site-pill-indicator {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        height: 2rem;
+        width: 0;
+        border-radius: 999px;
+        background: var(--fg);
+        transform: translate3d(0, -50%, 0);
+        transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+                    width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+                    opacity 220ms ease;
+        pointer-events: none;
+        opacity: 0;
+        z-index: 0;
+      }
+      .site-pill-indicator.is-ready { opacity: 1; }
+      .site-pill > a { z-index: 1; }
+
+      /* Post-mode pill — replaces sections with back link + active title */
+      .site-pill--post { gap: 0.25rem; max-width: min(80vw, 36rem); }
+      .site-pill-back {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35em;
+        height: 2rem;
+        padding: 0 0.875rem;
+        border-radius: 999px;
+        background: transparent;
+        border: 0;
+        font: inherit;
+        cursor: pointer;
+        color: var(--text-2, rgba(var(--foreground-color-rgb), 0.62));
+        text-decoration: none;
+        transition: color 160ms ease;
+      }
+      .site-pill-back:hover { color: var(--foreground-color); }
+      .site-pill-active {
+        display: inline-flex;
+        align-items: center;
+        height: 2rem;
+        padding: 0 0.875rem;
+        border-radius: 999px;
+        background: var(--fg);
+        color: var(--accent-bright, var(--accent));
+        font-weight: 500;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Live local-time capsule — display only, no theme toggle */
+      .site-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        height: 2.625rem;
+        padding: 0 0.875rem 0 0.75rem;
+        background: #ffffff;
+        border-radius: 999px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        font-family: var(--sansFont);
+        font-size: var(--text-mini);
+        color: #0f1d07;
+        white-space: nowrap;
+        transition: background 220ms ease, box-shadow 220ms ease, backdrop-filter 220ms ease;
+      }
+      .site-nav.is-scrolled .site-time {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px) saturate(140%);
+        -webkit-backdrop-filter: blur(12px) saturate(140%);
+        box-shadow: 0 4px 18px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.03);
+      }
+      .site-time-zone {
+        font-family: var(--sansFont);
+        font-size: var(--text-micro);
+        font-weight: 500;
+      }
+      .site-time-sep { opacity: 0.4; }
+      .site-time-clock {
+        font-family: var(--sansFont);
+        font-size: var(--text-micro);
+        font-variant-numeric: tabular-nums;
+      }
+      @media (max-width: 640px) {
+        .site-time-zone, .site-time-sep { display: none; }
+      }
+
+      /* Reset rsms-base body padding; every top-level section handles its own
+         max-width + edge padding via the site container tokens. */
+      body { padding: 0; max-width: none; }
+      r-grid.main {
+        max-width: var(--site-max-width);
+        margin: 0 auto;
+        padding: 0 var(--site-edge);
+        box-sizing: border-box;
+      }
+
+      @media (max-width: 880px) {
+        .site-nav { height: 4rem; padding: 0 1rem; }
+      }
+
+      /* Site footer */
+      .site-foot {
+        margin: 0 auto;
+        max-width: var(--site-max-width);
+        padding: clamp(3rem, 6vw, 5rem) var(--site-edge) 1.5rem;
+        box-sizing: border-box;
+        font-family: var(--sansFont);
+        color: var(--foreground-color);
+      }
+      .site-foot-intro {
+        font-family: var(--sansFont);
+        font-size: var(--text-h2);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        color: var(--foreground-color);
+        margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+      }
+      .site-foot-email {
+        display: block;
+        font-family: var(--titleFont);
+        font-size: var(--text-display);
+        line-height: 1;
+        letter-spacing: -0.03em;
+        font-weight: 400;
+        color: var(--foreground-color);
+        text-decoration: none;
+        transition: opacity 160ms ease;
+      }
+      .site-foot-email:hover { opacity: 0.7; text-decoration: none; }
+      .site-foot-alt {
+        font-family: var(--titleFont);
+        font-size: var(--text-display);
+        line-height: 1;
+        letter-spacing: -0.03em;
+        font-weight: 400;
+        margin: clamp(0.5rem, 1vw, 1rem) 0 0;
+      }
+      .site-foot-alt > span {
+        color: rgba(var(--foreground-color-rgb), 0.4);
+      }
+      .site-foot-alt a {
+        color: var(--foreground-color);
+        text-decoration: none;
+        transition: opacity 160ms ease;
+      }
+      .site-foot-alt a:hover { opacity: 0.7; text-decoration: none; }
+      a[href]:hover { text-decoration: none; }
+      .site-foot-bottom {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 0.75rem;
+        font-family: var(--sansFont);
+        font-size: var(--text-mini);
+        color: rgba(var(--foreground-color-rgb), 0.55);
+        margin: clamp(3rem, 6vw, 5rem) 0 0;
+      }
+      .site-foot-dot { opacity: 0.6; }
+    </style>
+  </head>
+  <body>
+    <a href="#page-content" class="site-skip">Skip to content</a>
+    <header class="site-nav" aria-label="Primary" transition:persist>
+      {inDetailMode ? (
+        <nav class="site-pill site-pill--post" aria-label="Page">
+          <a href={backHref} class="site-pill-back">
+            <span aria-hidden="true">←</span> {backLabel}
+          </a>
+          <span class="site-pill-active" aria-current="page">{postTitle}</span>
+        </nav>
+      ) : (
+        <nav class="site-pill" aria-label="Sections">
+          <span class="site-pill-indicator" aria-hidden="true"></span>
+          <a href="/" data-section="home">Home</a>
+          <a href="/research/" data-section="research">Research</a>
+          <a href="/notes/" data-section="notes">Notes</a>
+        </nav>
+      )}
+      <div class="site-time" aria-label="Local time in Tallinn">
+        <span class="site-time-zone" data-local-zone>—</span>
+        <span class="site-time-sep" aria-hidden="true">·</span>
+        <span class="site-time-clock" data-local-time>—</span>
+      </div>
+    </header>
+    <div id="page-content"></div>
+    <slot />
+    {!hideFooter && (
+    <footer class="site-foot" aria-label="Footer" transition:persist>
+      <p class="site-foot-intro">What's next? Let's get in touch!</p>
+      <a href="mailto:hey@ayoomole.xyz" class="site-foot-email">hey@ayoomole.xyz</a>
+      <p class="site-foot-alt">
+        <span>or reach out via</span>
+        <a href="https://linkedin.com/in/ayoomole" rel="me">LinkedIn</a>
+      </p>
+      <p class="site-foot-bottom">
+        <span>© {new Date().getFullYear()} Ayo Omole</span>
+        <span class="site-foot-dot" aria-hidden="true">•</span>
+        <span>{'{no}coded with love & coffee'}</span>
+      </p>
+    </footer>
+    )}
+  </body>
+</html>

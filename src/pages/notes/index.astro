@@ -1,0 +1,140 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('notes', (e) => e.data.published !== false))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const readingTime = (text: string) => {
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
+};
+---
+<Layout
+  pageClass="archive"
+  title="Notes — Ayo Omole"
+  description="Notes, essays, and working thoughts from Ayo Omole on product design, advisory, and the craft."
+>
+  <main class="nt">
+    <header class="nt-head">
+      <h1 class="nt-title">Notes</h1>
+      <p class="nt-lede">
+        Working thoughts on product design, advisory, and the craft. New entries land here as they're written.
+      </p>
+    </header>
+
+    {posts.length === 0 ? (
+      <p class="nt-empty">
+        No notes published yet. Check back soon.
+      </p>
+    ) : (
+      <ul class="nt-feed" aria-label="Notes feed">
+        {posts.map((post) => {
+          const minutes = readingTime((post.body || '') + ' ' + (post.data.description || ''));
+          return (
+            <li class="nt-entry">
+              <a class="nt-entry-link" href={`/notes/${post.data.slug}`}>
+                <h2 class="nt-entry-title">{post.data.title}</h2>
+                <time class="nt-entry-meta" datetime={post.data.pubDate.toISOString()}>
+                  {fmtDate(post.data.pubDate)} · {minutes} min read
+                </time>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </main>
+
+  <style>
+    .nt {
+      max-width: 50%;
+      margin: 0;
+      padding: clamp(2rem, 4vw, 3rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+    }
+
+    .nt-head {
+      margin-bottom: clamp(2.5rem, 5vw, 4rem);
+    }
+    .nt-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      font-weight: 400;
+      margin: 0 0 clamp(0.875rem, 1.5vw, 1.25rem);
+    }
+    .nt-lede {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.45;
+      color: rgba(var(--foreground-color-rgb), 0.65);
+      max-width: 60ch;
+      margin: 0;
+    }
+
+    .nt-empty {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+    }
+    .nt-empty a {
+      color: var(--foreground-color);
+      border-bottom: 1px solid currentColor;
+      text-decoration: none;
+    }
+
+    /* Feed */
+    .nt-feed {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid rgba(var(--foreground-color-rgb), 0.15);
+    }
+    .nt-entry {
+      border-bottom: 1px solid rgba(var(--foreground-color-rgb), 0.15);
+    }
+    .nt-entry-link {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: clamp(1.25rem, 2vw, 1.75rem) 0;
+      color: inherit;
+      text-decoration: none;
+      transition: opacity 160ms ease;
+    }
+    .nt-entry-link:hover { opacity: 0.85; }
+
+    .nt-entry-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-h5);
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      font-weight: 400;
+      color: var(--foreground-color);
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+    }
+    .nt-entry-link:hover .nt-entry-title { color: var(--accent); }
+
+    .nt-entry-meta {
+      flex-shrink: 0;
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      white-space: nowrap;
+    }
+    @media (max-width: 560px) {
+      .nt-entry-link { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .nt-entry-meta { white-space: normal; }
+    }
+  </style>
+</Layout>

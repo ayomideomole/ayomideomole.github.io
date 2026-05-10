@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout
+  pageClass="archive"
+  title="Not found — Ayo Omole"
+  description="This page wandered off."
+  hideFooter
+>
+  <main class="nf">
+    <p class="nf-eyebrow">404</p>
+    <h1 class="nf-title">Err… don't think this page exists.</h1>
+    <p class="nf-lede">
+      The link is broken, the page moved, or it never existed in the first place. Plenty of other places to land:
+    </p>
+    <ul class="nf-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/research/">Research</a></li>
+      <li><a href="/notes/">Notes</a></li>
+    </ul>
+    <p class="nf-foot">
+      Looking for something specific? <a href="mailto:hey@ayoomole.xyz">Drop me a note</a>.
+    </p>
+  </main>
+
+  <style>
+    .nf {
+      max-width: 50%;
+      margin: 0;
+      padding: clamp(3rem, 6vw, 5rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+    }
+    .nf-eyebrow {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      margin: 0 0 1rem;
+    }
+    .nf-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+    .nf-lede {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      max-width: 50ch;
+      margin: 0 0 clamp(1.5rem, 3vw, 2rem);
+    }
+    .nf-links {
+      list-style: none;
+      margin: 0 0 clamp(2rem, 4vw, 3rem);
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .nf-links a {
+      display: inline-flex;
+      align-items: center;
+      height: 2.25rem;
+      padding: 0 1rem;
+      border-radius: 999px;
+      background: rgba(var(--foreground-color-rgb), 0.06);
+      color: var(--foreground-color);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 160ms ease;
+    }
+    .nf-links a:hover { background: rgba(var(--foreground-color-rgb), 0.12); }
+    .nf-foot {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.55);
+      margin: 0;
+    }
+    .nf-foot a {
+      color: var(--foreground-color);
+      border-bottom: 1px solid currentColor;
+      text-decoration: none;
+    }
+  </style>
+</Layout>

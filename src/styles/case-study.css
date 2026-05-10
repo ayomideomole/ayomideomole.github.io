@@ -1,0 +1,173 @@
+/* Case study layout — used by /[slug] route AND the home-page modal sheet.
+   Imported once globally by Layout.astro so the styles are available everywhere. */
+
+.cs {
+  max-width: var(--site-max-width);
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 4rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+  box-sizing: border-box;
+  color: var(--foreground-color);
+}
+
+/* Two-column: text on the left, image stack on the right */
+.cs-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+/* Left column — text content */
+.cs-text {
+  position: sticky;
+  top: clamp(6rem, 10vh, 8rem);
+  max-width: 36rem;
+}
+.cs-meta {
+  font-family: var(--sansFont);
+  font-size: var(--text-small);
+  color: rgba(var(--foreground-color-rgb), 0.55);
+  margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+}
+.cs-title {
+  font-family: var(--titleFont);
+  font-size: var(--text-h1);
+  line-height: 1.0;
+  letter-spacing: -0.04em;
+  font-weight: 400;
+  color: var(--accent);
+  margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+}
+.cs-tag {
+  display: inline-block;
+  padding: 0.32rem 0.75rem;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--sansFont);
+  font-size: var(--text-mini);
+  font-weight: 500;
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+}
+.cs-summary {
+  font-family: var(--titleFont);
+  font-size: var(--text-h5);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  font-weight: 400;
+  color: var(--foreground-color);
+  margin: 0 0 clamp(1.5rem, 3vw, 2rem);
+}
+
+/* Body prose */
+.cs-body {
+  font-family: var(--sansFont);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: rgba(var(--foreground-color-rgb), 0.78);
+}
+.cs-body p { margin: 0 0 1.25em; }
+.cs-body p:last-child { margin-bottom: 0; }
+.cs-body h2 {
+  font-family: var(--titleFont);
+  font-size: var(--text-h4);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+  color: var(--foreground-color);
+  margin: clamp(2rem, 4vw, 3rem) 0 clamp(0.5rem, 1vw, 1rem);
+}
+.cs-body a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+.cs-body a:hover { opacity: 0.7; }
+.cs-body blockquote {
+  font-family: var(--titleFont);
+  font-size: var(--text-large);
+  line-height: 1.35;
+  font-weight: 400;
+  color: var(--foreground-color);
+  margin: clamp(1.5rem, 3vw, 2.5rem) 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent);
+}
+.cs-body ul,
+.cs-body ol {
+  margin: 0 0 1.25em;
+  padding-left: 1.5em;
+}
+.cs-body li { margin-bottom: 0.5em; }
+.cs-body hr {
+  border: 0;
+  height: 1px;
+  background: rgba(var(--foreground-color-rgb), 0.18);
+  margin: clamp(1.5rem, 3vw, 2.5rem) 0;
+}
+
+/* Right column — image stack */
+.cs-media {
+  display: grid;
+  gap: clamp(0.875rem, 1.5vw, 1.25rem);
+}
+.cs-media-tile {
+  margin: 0;
+  border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+  overflow: hidden;
+  background: rgba(var(--foreground-color-rgb), 0.05);
+}
+.cs-media-tile img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Placeholder rectangles for projects without imagery */
+.cs-media-placeholder {
+  border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+  background: color-mix(in oklab, var(--bg) 88%, var(--fg));
+}
+.cs-media-placeholder--1 { aspect-ratio: 4 / 3; }
+.cs-media-placeholder--2 { aspect-ratio: 1 / 1; }
+.cs-media-placeholder--3 { aspect-ratio: 16 / 10; }
+
+@media (max-width: 960px) {
+  .cs-grid { grid-template-columns: 1fr; gap: clamp(2rem, 4vw, 3rem); }
+  .cs-text { position: static; max-width: 60ch; }
+}
+
+/* Foot — prev / next */
+.cs-foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: clamp(4rem, 8vw, 6rem);
+  padding-top: clamp(1.5rem, 3vw, 2.5rem);
+  border-top: 1px solid rgba(var(--foreground-color-rgb), 0.18);
+}
+.cs-foot-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 160ms ease;
+}
+.cs-foot-link--next { text-align: right; align-items: flex-end; }
+.cs-foot-link:hover { opacity: 0.7; }
+.cs-foot-dir {
+  font-family: var(--sansFont);
+  font-size: var(--text-small);
+  color: rgba(var(--foreground-color-rgb), 0.55);
+}
+.cs-foot-title {
+  font-family: var(--titleFont);
+  font-size: var(--text-h5);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+@media (max-width: 560px) {
+  .cs-foot { grid-template-columns: 1fr; }
+  .cs-foot-link--next { text-align: left; align-items: flex-start; }
+}
