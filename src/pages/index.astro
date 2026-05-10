@@ -793,7 +793,7 @@ const featuredWork = (await getCollection('work', (e) => e.data.featured && e.da
     })();
   </script>
 
-  <script is:inline>
+  <script is:inline data-astro-rerun>
     (() => {
       // Per-tile tilt
       document.querySelectorAll('.bio-tile[data-tilt]').forEach((el) => {
@@ -804,7 +804,8 @@ const featuredWork = (await getCollection('work', (e) => e.data.featured && e.da
       const card = btn?.closest('.bio-card');
       const extra = document.getElementById('bio-extra');
       const label = btn?.querySelector('.bio-button-label');
-      if (btn && card && extra && label) {
+      if (btn && card && extra && label && !btn.dataset.bioWired) {
+        btn.dataset.bioWired = '1';
         btn.addEventListener('click', () => {
           const open = !card.classList.contains('is-expanded');
           card.classList.toggle('is-expanded', open);
