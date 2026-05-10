@@ -615,7 +615,7 @@ const featuredWork = (await getCollection('work', (e) => e.data.featured && e.da
       const getModal = () => document.getElementById('cs-modal');
       const getBackdrop = () => document.getElementById('cs-modal-backdrop');
       const getBody = () => document.getElementById('cs-modal-body');
-      const getPill = () => $('.site-pill');
+      const getPill = () => document.querySelector('.site-pill');
 
       const setPostMode = (title) => {
         const html = document.documentElement;
