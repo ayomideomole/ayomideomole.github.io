@@ -337,12 +337,12 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
 
         /* Type scale — humaan-style fluid clamps. Single 1.33x growth factor.
            Anchor design width: ~1512px. Below clamps to min, above clamps to max. */
-        --text-display: clamp(2.5rem, 8.4vw, 7.5rem);       /* hero: 40→120px */
-        --text-h1:      clamp(3.125rem, 5.2vw, 4.15625rem); /* 50→66px */
-        --text-h2:      clamp(2.5rem, 4.16vw, 3.325rem);    /* 40→53px */
-        --text-h3:      clamp(2.1875rem, 3.65vw, 2.90938rem); /* 35→47px */
-        --text-h4:      clamp(1.75rem, 2.92vw, 2.3275rem);  /* 28→37px */
-        --text-h5:      clamp(1.5rem, 2.5vw, 1.995rem);     /* 24→32px */
+        --text-display: clamp(2rem, 8.4vw, 7.5rem);         /* hero: 32→120px */
+        --text-h1:      clamp(2rem, 5.2vw, 4.15625rem);     /* 32→66px */
+        --text-h2:      clamp(1.75rem, 4.16vw, 3.325rem);   /* 28→53px */
+        --text-h3:      clamp(1.5rem, 3.65vw, 2.90938rem);  /* 24→47px */
+        --text-h4:      clamp(1.375rem, 2.92vw, 2.3275rem); /* 22→37px */
+        --text-h5:      clamp(1.1875rem, 2.5vw, 1.995rem);  /* 19→32px */
         --text-large:   clamp(1.25rem, 2.08vw, 1.6625rem);  /* 20→27px */
         --text-medium:  clamp(1.125rem, 1.875vw, 1.49625rem); /* 18→24px */
         --text-body:    clamp(1rem, 1.66vw, 1.33rem);       /* 16→21px */
@@ -644,15 +644,15 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
       }
       .site-pill-back:hover { color: var(--foreground-color); }
       .site-pill-active {
-        display: inline-flex;
-        align-items: center;
-        height: 2rem;
+        display: inline-block;
+        line-height: 2rem;
         padding: 0 0.875rem;
         border-radius: 999px;
         background: var(--fg);
         color: var(--accent-bright, var(--accent));
         font-weight: 500;
         max-width: 100%;
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -693,6 +693,11 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
       }
       @media (max-width: 640px) {
         .site-time-zone, .site-time-sep { display: none; }
+      }
+      @media (max-width: 560px) {
+        .site-time { display: none; }
+        .site-pill--post { max-width: calc(100vw - 2 * var(--site-edge)); }
+        .site-pill-active { max-width: 11rem; }
       }
 
       /* Reset rsms-base body padding; every top-level section handles its own
