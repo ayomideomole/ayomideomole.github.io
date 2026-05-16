@@ -1,0 +1,272 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+interface PlayItem {
+  slug: string;
+  title: string;
+  summary: string;
+  category: string;
+  status: 'live' | 'wip';
+  href: string;
+  icon: 'claude' | 'type' | 'wcag' | 'timer';
+}
+
+const items: PlayItem[] = [
+  {
+    slug: 'critique-simulator',
+    title: 'Critique simulator',
+    summary: 'Drop a UI screenshot. Get three critiques from three voices — strict reviewer, pragmatic PM, curious user — plus a "where they agree" summary. Powered live by Claude.',
+    category: 'Live skill · Critique',
+    status: 'live',
+    href: '/play/critique-simulator/',
+    icon: 'claude',
+  },
+  {
+    slug: 'type',
+    title: 'Type scale generator',
+    summary: 'Pick a base, pick a ratio, get a system. Sensible line-heights, copy-paste for CSS, Tailwind, and Figma tokens.',
+    category: 'Tool · Typography',
+    status: 'live',
+    href: '/play/type/',
+    icon: 'type',
+  },
+  {
+    slug: 'prd-design-brief',
+    title: 'PRD → Design brief',
+    summary: 'A Claude skill that turns a thin PRD into the design brief you wish your PM had written: user stories, UI states, copy slots, a11y, and the questions worth chasing down.',
+    category: 'Skill · Process',
+    status: 'live',
+    href: '/play/prd-design-brief/',
+    icon: 'claude',
+  },
+  {
+    slug: 'design-system-bootstrapper',
+    title: 'Design system bootstrapper',
+    summary: 'A Claude skill that turns a one-paragraph brief into a starter design system — palette with WCAG checks, type scale, spacing, component shapes, names, and the three decisions worth making next.',
+    category: 'Skill · Foundations',
+    status: 'live',
+    href: '/play/design-system-bootstrapper/',
+    icon: 'claude',
+  },
+  {
+    slug: 'loupework',
+    title: 'Loupework',
+    summary: 'A focus timer for designers. Time-box exploration, refinement, and rest. Soft fences so you stop polishing the same frame for two hours.',
+    category: 'Tool · Focus',
+    status: 'wip',
+    href: 'https://loupework.app',
+    icon: 'timer',
+  },
+  {
+    slug: 'wcag',
+    title: 'WCAG color checker',
+    summary: 'Drop in two colors, get the contrast ratio, the WCAG grade, and a sample of body + display text rendered against the pair.',
+    category: 'Tool · Accessibility',
+    status: 'wip',
+    href: '/play/wcag/',
+    icon: 'wcag',
+  },
+];
+---
+<Layout
+  pageClass="playground"
+  title="Play — Ayo Omole"
+  description="Small tools, each built in a single day of Claude-coding."
+>
+  <main class="pl">
+    <header class="pl-head">
+      <h1 class="pl-title">Play</h1>
+      <p class="pl-lede">
+        Tools, built in a day. Each one's a one-day experiment co-created with Claude. Some are useful. Some are silly. All are excuses to learn something new — and a way to keep my hands on the craft.
+      </p>
+    </header>
+
+    <ul class="pl-grid" aria-label="Play projects">
+      {items.map((item) => {
+        const Tag = item.status === 'live' ? 'a' : 'div';
+        return (
+          <li class={`pl-card pl-card--${item.status}`}>
+            <Tag class="pl-card-link" {...(item.status === 'live' ? { href: item.href } : { 'aria-disabled': 'true' })}>
+              <div class={`pl-card-icon pl-card-icon--${item.icon}`} aria-hidden="true">
+                {item.icon === 'claude' && (
+                  <svg viewBox="0 -0.01 39.5 39.53" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Claude">
+                    <path fill="#d97757" d="m7.75 26.27 7.77-4.36.13-.38-.13-.21h-.38l-1.3-.08-4.44-.12-3.85-.16-3.73-.2-.94-.2-.88-1.16.09-.58.79-.53 1.13.1 2.5.17 3.75.26 2.72.16 4.03.42h.64l.09-.26-.22-.16-.17-.16-3.88-2.63-4.2-2.78-2.2-1.6-1.19-.81-.6-.76-.26-1.66 1.08-1.19 1.45.1.37.1 1.47 1.13 3.14 2.43 4.1 3.02.6.5.24-.17.03-.12-.27-.45-2.23-4.03-2.38-4.1-1.06-1.7-.28-1.02c-.1-.42-.17-.77-.17-1.2l1.23-1.67.68-.22 1.64.22.69.6 1.02 2.33 1.65 3.67 2.56 4.99.75 1.48.4 1.37.15.42h.26v-.24l.21-2.81.39-3.45.38-4.44.13-1.25.62-1.5 1.23-.81.96.46.79 1.13-.11.73-.47 3.05-.92 4.78-.6 3.2h.35l.4-.4 1.62-2.15 2.72-3.4 1.2-1.35 1.4-1.49.9-.71h1.7l1.25 1.86-.56 1.92-1.75 2.22-1.45 1.88-2.08 2.8-1.3 2.24.12.18.31-.03 4.7-1 2.54-.46 3.03-.52 1.37.64.15.65-.54 1.33-3.24.8-3.8.76-5.66 1.34-.07.05.08.1 2.55.24 1.09.06h2.67l4.97.37 1.3.86.78 1.05-.13.8-2 1.02-2.7-.64-6.3-1.5-2.16-.54h-.3v.18l1.8 1.76 3.3 2.98 4.13 3.84.21.95-.53.75-.56-.08-3.63-2.73-1.4-1.23-3.17-2.67h-.21v.28l.73 1.07 3.86 5.8.2 1.78-.28.58-1 .35-1.1-.2-2.26-3.17-2.33-3.57-1.88-3.2-.23.13-1.11 11.95-.52.61-1.2.46-1-.76-.53-1.23.53-2.43.64-3.17.52-2.52.47-3.13.28-1.04-.02-.07-.23.03-2.36 3.24-3.59 4.85-2.84 3.04-.68.27-1.18-.61.11-1.09.66-.97 3.93-5 2.37-3.1 1.53-1.79-.01-.26h-.09l-10.44 6.78-1.86.24-.8-.75.1-1.23.38-.4 3.14-2.16z"/>
+                  </svg>
+                )}
+                {item.icon === 'type' && (
+                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <text x="2" y="14" font-family="Georgia, serif" font-size="14" font-weight="500" fill="currentColor">T</text>
+                    <text x="13" y="22" font-family="Georgia, serif" font-size="10" font-weight="500" fill="currentColor">T</text>
+                    <text x="22" y="28" font-family="Georgia, serif" font-size="6" font-weight="500" fill="currentColor">T</text>
+                  </svg>
+                )}
+                {item.icon === 'wcag' && (
+                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <path d="M16 3 A13 13 0 0 1 16 29 Z" fill="currentColor"/>
+                  </svg>
+                )}
+                {item.icon === 'timer' && (
+                  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="17.5" r="11" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <path d="M16 17.5 L16 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M16 17.5 L21 17.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M12 3 L20 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M16 3 L16 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                )}
+              </div>
+              <span class="pl-card-topic">{item.category}</span>
+              <h2 class="pl-card-title">{item.title}</h2>
+              <p class="pl-card-summary">{item.summary}</p>
+              <span class={`pl-card-cta pl-card-cta--${item.status}`}>
+                {item.status === 'live' ? 'Open' : 'Coming soon'}
+                {item.status === 'live' && <span class="pl-card-arrow" aria-hidden="true">&rarr;</span>}
+              </span>
+            </Tag>
+          </li>
+        );
+      })}
+    </ul>
+  </main>
+
+  <style>
+    .pl {
+      max-width: var(--site-max-width);
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+    }
+
+    .pl-head {
+      margin-bottom: clamp(3rem, 6vw, 5rem);
+      max-width: 80%;
+    }
+    .pl-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.98;
+      letter-spacing: -0.025em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+    .pl-eyebrow {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      margin: 0 0 1rem;
+    }
+    .pl-lede {
+      font-family: var(--titleFont);
+      font-size: var(--text-h4);
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      font-weight: 400;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      max-width: 60ch;
+      margin: 0;
+    }
+
+    .pl-grid {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(0.875rem, 1.5vw, 1.25rem);
+    }
+    .pl-card {
+      background: #ffffff;
+      border-radius: clamp(1rem, 1.5vw, 1.25rem);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms ease;
+    }
+    .pl-card--live:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px -8px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .pl-card--wip { opacity: 0.7; }
+    .pl-card-link {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      padding: clamp(1.5rem, 2.5vw, 2rem);
+      color: inherit;
+      text-decoration: none;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .pl-card--wip .pl-card-link { cursor: not-allowed; }
+
+    .pl-card-icon {
+      width: 2.75rem;
+      height: 2.75rem;
+      display: grid;
+      place-items: center;
+      color: var(--foreground-color);
+      margin-bottom: 0.5rem;
+      margin-left: -0.375rem;
+      transition: color 200ms ease, transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .pl-card-icon svg { width: 100%; height: 100%; }
+    .pl-card--live:hover .pl-card-icon {
+      transform: rotate(-4deg);
+    }
+    .pl-card--live:hover .pl-card-icon--claude {
+      transform: rotate(45deg);
+    }
+
+    .pl-card-topic {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+    }
+    .pl-card-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-h4);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      color: var(--foreground-color);
+      margin: 0;
+      transition: color 160ms ease;
+    }
+    .pl-card--live:hover .pl-card-title { color: var(--accent); }
+    .pl-card-summary {
+      font-family: var(--sansFont);
+      font-size: var(--text-medium);
+      line-height: 1.45;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      margin: 0;
+      flex: 1;
+    }
+    .pl-card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      margin-top: 0.5rem;
+      padding-top: 0.875rem;
+      border-top: 1px solid rgba(var(--foreground-color-rgb), 0.08);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      color: var(--foreground-color);
+    }
+    .pl-card-cta--wip { color: rgba(var(--foreground-color-rgb), 0.45); }
+    .pl-card-arrow {
+      display: inline-block;
+      transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .pl-card--live:hover .pl-card-arrow { transform: translateX(0.25em); }
+
+    @media (max-width: 880px) {
+      .pl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .pl-head { max-width: 100%; }
+      .pl-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</Layout>

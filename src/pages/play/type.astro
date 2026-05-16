@@ -1,0 +1,611 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout
+  pageClass="playground"
+  title="Type scale — Ayo Omole"
+  description="Pick a base, pick a ratio, get a complete type system. Copy-paste into CSS, Tailwind, or Figma tokens."
+  palette={{ bg: '#e7eef8', fg: '#0a1830', accent: '#1d4ed8' }}
+>
+  <main class="ts">
+    <header class="ts-head">
+      <p class="ts-eyebrow">Play · 01 · Typography</p>
+      <h1 class="ts-title">Type scale generator.</h1>
+      <p class="ts-lede">
+        Pick a base, pick a ratio, get a system. Each tier comes with a sensible line-height. Copy-paste into your CSS, Tailwind config, or Figma tokens.
+      </p>
+    </header>
+
+    <section class="ts-grid">
+      <div class="ts-stage" id="ts-stage" aria-live="polite"></div>
+
+      <aside class="ts-panel" aria-label="Scale controls">
+        <div class="ts-control">
+          <div class="ts-control-head">
+            <span class="ts-label">Base size</span>
+            <span class="ts-readout" data-readout="base">16px</span>
+          </div>
+          <input type="range" data-prop="base" min="12" max="24" step="0.25" value="16" />
+        </div>
+
+        <div class="ts-control">
+          <span class="ts-label">Ratio</span>
+          <div class="ts-segmented ts-segmented--wrap" role="radiogroup" aria-label="Ratio">
+            <button type="button" data-prop="ratio" data-value="1.067" title="Minor 2nd">1.067</button>
+            <button type="button" data-prop="ratio" data-value="1.125" title="Major 2nd">1.125</button>
+            <button type="button" data-prop="ratio" data-value="1.2" title="Minor 3rd">1.2</button>
+            <button type="button" data-prop="ratio" data-value="1.25" title="Major 3rd" data-active>1.25</button>
+            <button type="button" data-prop="ratio" data-value="1.333" title="Perfect 4th">1.333</button>
+            <button type="button" data-prop="ratio" data-value="1.414" title="Aug 4th">1.414</button>
+            <button type="button" data-prop="ratio" data-value="1.5" title="Perfect 5th">1.5</button>
+            <button type="button" data-prop="ratio" data-value="1.618" title="Golden">φ</button>
+          </div>
+        </div>
+
+        <div class="ts-control">
+          <span class="ts-label">Family</span>
+          <div class="ts-segmented" role="radiogroup">
+            <button type="button" data-prop="font" data-value="serif" data-active>Serif</button>
+            <button type="button" data-prop="font" data-value="sans">Sans</button>
+            <button type="button" data-prop="font" data-value="mono">Mono</button>
+          </div>
+        </div>
+
+        <div class="ts-control">
+          <div class="ts-control-head">
+            <span class="ts-label">Steps up</span>
+            <span class="ts-readout" data-readout="up">6</span>
+          </div>
+          <input type="range" data-prop="up" min="3" max="6" step="1" value="6" />
+        </div>
+
+        <div class="ts-control">
+          <div class="ts-control-head">
+            <span class="ts-label">Steps down</span>
+            <span class="ts-readout" data-readout="down">3</span>
+          </div>
+          <input type="range" data-prop="down" min="0" max="3" step="1" value="3" />
+        </div>
+
+        <div class="ts-control">
+          <span class="ts-label">Sample text</span>
+          <input type="text" class="ts-text-input" data-prop="sample" value="The quick brown fox jumps over the lazy dog" />
+        </div>
+
+        <div class="ts-control">
+          <span class="ts-label">Export format</span>
+          <select class="ts-select" data-prop="format">
+            <option value="css">CSS variables</option>
+            <option value="tailwind">Tailwind config</option>
+            <option value="tokens">Figma Tokens (Tokens Studio)</option>
+            <option value="json">Plain JSON</option>
+          </select>
+        </div>
+
+        <div class="ts-actions">
+          <div class="ts-actions-row">
+            <button type="button" class="ts-action" data-action="reset">Reset</button>
+            <button type="button" class="ts-action" data-action="share">
+              <span class="ts-action-text">Share</span>
+            </button>
+          </div>
+          <button type="button" class="ts-action ts-action--primary ts-action--full" data-action="copy">
+            <span class="ts-action-text">Copy code</span>
+          </button>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <style>
+    .ts {
+      max-width: var(--site-max-width);
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+    }
+
+    .ts-head {
+      max-width: 60ch;
+      margin-bottom: clamp(2.5rem, 5vw, 4rem);
+    }
+    .ts-eyebrow {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      margin: 0 0 1rem;
+    }
+    .ts-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+    .ts-lede {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.65);
+      margin: 0;
+    }
+
+    .ts-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      align-items: start;
+      margin-bottom: clamp(2rem, 4vw, 3rem);
+    }
+    @media (max-width: 880px) {
+      .ts-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    /* Stage — stacked specimen */
+    .ts-stage {
+      padding: clamp(1.25rem, 2.5vw, 2rem);
+      background: #ffffff;
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.5rem, 3vw, 2.25rem);
+      overflow: hidden;
+    }
+    .ts-tier {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-bottom: clamp(1rem, 2vw, 1.5rem);
+      border-bottom: 1px solid rgba(var(--foreground-color-rgb), 0.06);
+    }
+    .ts-tier:last-child { border-bottom: 0; padding-bottom: 0; }
+    .ts-tier-meta {
+      display: flex;
+      gap: 0.5rem 1rem;
+      flex-wrap: wrap;
+      align-items: baseline;
+    }
+    .ts-tier-name {
+      font-family: var(--monoFont);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(var(--foreground-color-rgb), 0.55);
+    }
+    .ts-tier-spec {
+      font-family: var(--monoFont);
+      font-size: 0.75rem;
+      color: rgba(var(--foreground-color-rgb), 0.4);
+      font-variant-numeric: tabular-nums;
+    }
+    .ts-tier-text {
+      margin: 0;
+      color: var(--fg);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      word-break: break-word;
+    }
+    .ts-stage[data-font="serif"] .ts-tier-text { font-family: var(--titleFont); }
+    .ts-stage[data-font="sans"] .ts-tier-text { font-family: var(--sansFont); letter-spacing: -0.01em; }
+    .ts-stage[data-font="mono"] .ts-tier-text { font-family: var(--monoFont); letter-spacing: 0; }
+
+    /* Panel */
+    .ts-panel {
+      position: sticky;
+      top: clamp(6rem, 10vh, 8rem);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.25rem, 2vw, 1.5rem);
+      padding: clamp(1.25rem, 2.5vw, 1.75rem);
+      background: #ffffff;
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    @media (max-width: 880px) {
+      .ts-panel { position: static; }
+    }
+
+    .ts-control { display: flex; flex-direction: column; gap: 0.625rem; }
+    .ts-control--inline { flex-direction: row; justify-content: space-between; align-items: center; }
+    .ts-control-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .ts-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.65);
+      font-weight: 500;
+    }
+    .ts-readout {
+      font-family: var(--monoFont);
+      font-size: var(--text-mini);
+      color: rgba(var(--foreground-color-rgb), 0.55);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Segmented */
+    .ts-segmented {
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.25rem;
+      background: rgba(var(--foreground-color-rgb), 0.05);
+      border-radius: 999px;
+      flex-wrap: wrap;
+    }
+    .ts-segmented--wrap { border-radius: 1rem; }
+    .ts-segmented button {
+      flex: 1 0 auto;
+      padding: 0.5rem 0.75rem;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(var(--foreground-color-rgb), 0.6);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 200ms ease, color 200ms ease;
+    }
+    .ts-segmented button:hover { color: var(--foreground-color); }
+    .ts-segmented button[data-active] {
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+    }
+
+    /* Range slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 1.25rem;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 0.25rem;
+      background: rgba(var(--foreground-color-rgb), 0.1);
+      border-radius: 999px;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 0.25rem;
+      background: rgba(var(--foreground-color-rgb), 0.1);
+      border-radius: 999px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 1.125rem;
+      height: 1.125rem;
+      margin-top: -0.4375rem;
+      border-radius: 50%;
+      background: var(--fg);
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 1.125rem;
+      height: 1.125rem;
+      border-radius: 50%;
+      background: var(--fg);
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Text input */
+    .ts-text-input {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.12);
+      border-radius: 0.5rem;
+      background: rgba(var(--foreground-color-rgb), 0.03);
+      color: var(--foreground-color);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      box-sizing: border-box;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+    .ts-text-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #ffffff;
+    }
+
+    /* Toggle */
+    .ts-toggle {
+      padding: 0.5rem 0.875rem;
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.18);
+      border-radius: 999px;
+      background: transparent;
+      color: rgba(var(--foreground-color-rgb), 0.6);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+      min-width: 4rem;
+    }
+    .ts-toggle[data-value="true"] {
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      border-color: var(--fg);
+    }
+
+    /* Actions */
+    .ts-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(var(--foreground-color-rgb), 0.08);
+      margin-top: 0.25rem;
+    }
+    .ts-actions-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .ts-action {
+      flex: 1;
+      min-width: 0;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.18);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--foreground-color);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 200ms ease, color 200ms ease, border-color 200ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .ts-action:hover { background: rgba(var(--foreground-color-rgb), 0.06); }
+    .ts-action--primary {
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      border-color: var(--fg);
+    }
+    .ts-action--primary:hover { background: var(--fg); transform: translateY(-1px); }
+    .ts-action--full { width: 100%; }
+    .ts-action.is-confirmed {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    /* Export select */
+    .ts-select {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      padding-right: 2.25rem;
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.18);
+      border-radius: 999px;
+      background: #ffffff;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23000' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.875rem center;
+      color: var(--foreground-color);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 160ms ease;
+    }
+    .ts-select:hover { border-color: rgba(var(--foreground-color-rgb), 0.32); }
+    .ts-select:focus { outline: none; border-color: var(--accent); }
+  </style>
+
+  <script is:inline data-astro-rerun>
+    (() => {
+      const stage = document.getElementById('ts-stage');
+      const panel = document.querySelector('.ts-panel');
+      if (!stage || !panel) return;
+
+      const TIER_NAMES = {
+        6: 'display', 5: 'h1', 4: 'h2', 3: 'h3', 2: 'h4', 1: 'h5',
+        0: 'body', '-1': 'small', '-2': 'mini', '-3': 'micro',
+      };
+
+      const DEFAULTS = {
+        base: 16,
+        ratio: 1.25,
+        font: 'serif',
+        up: 6,
+        down: 3,
+        sample: 'The quick brown fox jumps over the lazy dog',
+        format: 'css',
+      };
+
+      const state = { ...DEFAULTS };
+
+      const round = (n, d = 3) => parseFloat(n.toFixed(d));
+      const lineHeightFor = (step, up) => {
+        if (step <= 0) return 1.5;
+        const t = step / Math.max(up, 1);
+        return round(1.5 - t * (1.5 - 0.95), 2);
+      };
+
+      const buildTiers = () => {
+        const base = parseFloat(state.base);
+        const ratio = parseFloat(state.ratio);
+        const up = parseInt(state.up);
+        const down = parseInt(state.down);
+        const tiers = [];
+        for (let i = up; i >= -down; i--) {
+          const sizePx = base * Math.pow(ratio, i);
+          const lh = lineHeightFor(i, up);
+          tiers.push({
+            step: i,
+            name: TIER_NAMES[i] || (i > 0 ? `xl-${i}` : `xs-${Math.abs(i)}`),
+            sizePx: round(sizePx, 3),
+            sizeRem: round(sizePx / 16, 4),
+            lineHeight: lh,
+          });
+        }
+        return tiers;
+      };
+
+      const renderStage = () => {
+        stage.dataset.font = state.font;
+        const tiers = buildTiers();
+        const html = tiers.map((t) => {
+          const sizeStyle = `font-size: ${t.sizeRem}rem;`;
+          const sizeLabel = `${t.sizeRem}rem · ${t.sizePx.toFixed(1)}px`;
+          return `
+            <div class="ts-tier" data-step="${t.step}">
+              <div class="ts-tier-meta">
+                <span class="ts-tier-name">${t.name}</span>
+                <span class="ts-tier-spec">${sizeLabel} · ${t.lineHeight}</span>
+              </div>
+              <p class="ts-tier-text" style="${sizeStyle} line-height: ${t.lineHeight};">${escapeHtml(state.sample) || '&nbsp;'}</p>
+            </div>
+          `;
+        }).join('');
+        stage.innerHTML = html;
+      };
+
+      const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+
+      const buildExport = () => {
+        const tiers = buildTiers();
+        let txt = '';
+        if (state.format === 'css') {
+          const lines = ['/* Drop into :root or a section selector */', ':root {'];
+          tiers.forEach((t) => {
+            lines.push(`  --text-${t.name}: ${t.sizeRem}rem;`);
+            lines.push(`  --leading-${t.name}: ${t.lineHeight};`);
+          });
+          lines.push('}');
+          txt = lines.join('\n');
+        } else if (state.format === 'tailwind') {
+          const lines = ['// tailwind.config.js / .ts', 'fontSize: {'];
+          tiers.forEach((t, i) => {
+            const comma = i < tiers.length - 1 ? ',' : '';
+            lines.push(`  '${t.name}': ['${t.sizeRem}rem', { lineHeight: '${t.lineHeight}' }]${comma}`);
+          });
+          lines.push('}');
+          txt = lines.join('\n');
+        } else if (state.format === 'tokens') {
+          const obj = { typography: { fontSize: {}, lineHeight: {} } };
+          tiers.forEach((t) => {
+            obj.typography.fontSize[t.name] = { value: `${t.sizePx.toFixed(2)}px`, type: 'fontSizes' };
+            obj.typography.lineHeight[t.name] = { value: String(t.lineHeight), type: 'lineHeights' };
+          });
+          txt = JSON.stringify(obj, null, 2);
+        } else if (state.format === 'json') {
+          const arr = tiers.map((t) => ({ name: t.name, step: t.step, px: t.sizePx, rem: t.sizeRem, lineHeight: t.lineHeight }));
+          txt = JSON.stringify({ base: parseFloat(state.base), ratio: parseFloat(state.ratio), tiers: arr }, null, 2);
+        }
+        return txt;
+      };
+
+      const updateActiveStates = () => {
+        panel.querySelectorAll('button[data-prop]').forEach((btn) => {
+          const prop = btn.dataset.prop;
+          if (btn.dataset.value !== undefined) {
+            if (String(btn.dataset.value) === String(state[prop])) btn.setAttribute('data-active', '');
+            else btn.removeAttribute('data-active');
+          }
+        });
+        panel.querySelectorAll('input[type="range"]').forEach((input) => {
+          input.value = state[input.dataset.prop];
+        });
+        panel.querySelector('.ts-text-input').value = state.sample;
+        const sel = panel.querySelector('.ts-select');
+        if (sel) sel.value = state.format;
+        // Readouts
+        panel.querySelector('[data-readout="base"]').textContent = `${parseFloat(state.base).toFixed(2)}px · ${round(state.base / 16, 3)}rem`;
+        panel.querySelector('[data-readout="up"]').textContent = state.up;
+        panel.querySelector('[data-readout="down"]').textContent = state.down;
+      };
+
+      const apply = () => {
+        updateActiveStates();
+        renderStage();
+      };
+
+      const syncUrl = () => {
+        const params = new URLSearchParams();
+        Object.entries(state).forEach(([k, v]) => {
+          if (String(v) !== String(DEFAULTS[k])) params.set(k, String(v));
+        });
+        const qs = params.toString();
+        const url = qs ? `?${qs}` : window.location.pathname;
+        window.history.replaceState(null, '', url);
+      };
+
+      const loadFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        Object.keys(DEFAULTS).forEach((k) => {
+          const v = params.get(k);
+          if (v !== null) state[k] = v;
+        });
+      };
+
+      // Wire panel
+      panel.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-prop]');
+        if (!btn) return;
+        const prop = btn.dataset.prop;
+        state[prop] = btn.dataset.value;
+        apply();
+        syncUrl();
+      });
+
+      panel.querySelectorAll('input[type="range"]').forEach((input) => {
+        input.addEventListener('input', () => {
+          state[input.dataset.prop] = input.value;
+          apply();
+        });
+        input.addEventListener('change', syncUrl);
+      });
+
+      panel.querySelector('.ts-text-input').addEventListener('input', (e) => {
+        state.sample = e.target.value;
+        renderStage();
+        syncUrl();
+      });
+
+      // Export format select
+      panel.querySelector('.ts-select').addEventListener('change', (e) => {
+        state.format = e.target.value;
+        syncUrl();
+      });
+
+      // Actions
+      document.addEventListener('click', (e) => {
+        const action = e.target.closest('[data-action]');
+        if (!action) return;
+        const kind = action.dataset.action;
+        if (kind === 'reset') {
+          Object.assign(state, DEFAULTS);
+          apply();
+          syncUrl();
+        } else if (kind === 'share') {
+          navigator.clipboard.writeText(window.location.href).then(() => flashConfirm(action, 'Link copied'));
+        } else if (kind === 'copy') {
+          navigator.clipboard.writeText(buildExport()).then(() => flashConfirm(action, 'Copied!'));
+        }
+      });
+
+      const flashConfirm = (btn, msg) => {
+        const txt = btn.querySelector('.ts-action-text');
+        if (!txt) return;
+        const original = txt.textContent;
+        btn.classList.add('is-confirmed');
+        txt.textContent = msg;
+        setTimeout(() => {
+          btn.classList.remove('is-confirmed');
+          txt.textContent = original;
+        }, 1400);
+      };
+
+      loadFromUrl();
+      apply();
+    })();
+  </script>
+</Layout>

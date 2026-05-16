@@ -1,0 +1,12 @@
+name = "critique"
+main = "index.js"
+compatibility_date = "2025-05-01"
+
+# RATE_LIMIT_KV is created during deploy — see README.
+# Replace the id below with the one printed by `wrangler kv namespace create RATE_LIMIT_KV`.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "6fea9478a55644539549cd36b537e560"
+
+# Set the secret after deploy:
+#   wrangler secret put ANTHROPIC_API_KEY

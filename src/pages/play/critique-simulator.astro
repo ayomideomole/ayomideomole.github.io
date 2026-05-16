@@ -1,0 +1,516 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Paste the Cloudflare Worker URL here after deploy.
+// Example: https://critique.<your-subdomain>.workers.dev
+const WORKER_URL = 'https://critique.ayoomole.workers.dev';
+
+const exampleCritique = {
+  voices: [
+    {
+      name: 'Strict reviewer',
+      critique: 'The hierarchy fights itself. Three competing CTAs — "Get started," "Watch demo," and "Sign in" — all share roughly equal visual weight, which means none of them actually leads. The headline is set at the same size as the eyebrow underneath it; pick one as the entry point and demote the rest. Spacing is uneven: 24px gap above the hero, 16px below, 12px between the buttons. Pick a rhythm and hold it. The pricing chip at the top right is using a different corner radius than the buttons. Suggestion: collapse to a single primary CTA, drop the demo to a text link, and unify the radii on a 4px step.',
+    },
+    {
+      name: 'Pragmatic PM',
+      critique: 'What does success look like on this page? If the goal is sign-ups, the page is undermining itself — the "Watch demo" path leaks half the conversion. If the goal is education, the headline should explain what the product *is*, not what it *does*. Right now it does neither. What happens on mobile when the three CTAs stack? Where does the user land after sign-up — is there an onboarding flow ready, or do they hit an empty dashboard? Suggestion: define the single metric this page is responsible for (likely trial starts), then cut everything that doesn\'t move it.',
+    },
+    {
+      name: 'Curious user',
+      critique: 'Wait, what does this actually do? The headline says "ship faster" but I don\'t know what I\'m shipping. Is this for engineers? Designers? My manager? The buttons confused me — "Get started" usually means there\'s a form, but "Watch demo" sounds like a video, and "Sign in" makes me think I already have an account I forgot about. I\'d probably just leave. Suggestion: tell me what it is in one short sentence, like you\'re introducing it to a friend at a bar.',
+    },
+  ],
+  common_thread:
+    'All three voices flag the same root issue: the page asks the user to make three decisions before it\'s clear what the product even is. Lead with the value, demote everything else.',
+};
+---
+<Layout
+  pageClass="playground"
+  title="Critique simulator — Ayo Omole"
+  description="Drop a UI screenshot. Get three critiques from three voices: strict reviewer, pragmatic PM, curious user. Powered by Claude."
+  palette={{ bg: '#f0eef7', fg: '#1a142a', accent: '#6d28d9' }}
+>
+  <main class="cr">
+    <header class="cr-head">
+      <p class="cr-eyebrow">Play · 03 · Live skill</p>
+      <h1 class="cr-title">Critique simulator.</h1>
+      <p class="cr-lede">
+        Drop a screenshot of any UI. Get three critiques from three voices — strict reviewer, pragmatic PM, curious user — plus a "where they agree" summary. The lenses people forget to apply before they ship.
+      </p>
+      <div class="cr-meta">
+        <div class="cr-meta-item"><span class="cr-meta-label">Type</span><span class="cr-meta-value">Live Claude skill</span></div>
+        <div class="cr-meta-item"><span class="cr-meta-label">Powered by</span><span class="cr-meta-value">Claude Sonnet 4.5</span></div>
+        <div class="cr-meta-item"><span class="cr-meta-label">Limit</span><span class="cr-meta-value">5 critiques per visitor per day</span></div>
+      </div>
+    </header>
+
+    <section class="cr-input" aria-label="Critique input">
+      <form id="cr-form" class="cr-form">
+        <div class="cr-drop" id="cr-drop" tabindex="0" role="button" aria-label="Drop or choose image">
+          <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" id="cr-file" hidden />
+          <div class="cr-drop-empty" id="cr-drop-empty">
+            <span class="cr-drop-title">Drop a screenshot</span>
+            <span class="cr-drop-sub">or click to choose · PNG, JPG, WebP · up to 5MB</span>
+          </div>
+          <div class="cr-drop-preview" id="cr-drop-preview" hidden>
+            <img id="cr-preview" alt="" />
+            <button type="button" class="cr-drop-clear" id="cr-drop-clear">Change image</button>
+          </div>
+        </div>
+
+        <label class="cr-context">
+          <span class="cr-label">Context (optional)</span>
+          <textarea name="text" id="cr-text" rows="2" placeholder="What is this? What's it for? Any constraints to know about?"></textarea>
+        </label>
+
+        <div class="cr-actions">
+          <button type="submit" class="cr-action cr-action--primary" id="cr-submit">
+            <span class="cr-action-text">Get critique</span>
+          </button>
+        </div>
+
+        <p class="cr-status" id="cr-status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="cr-output" id="cr-output" aria-live="polite">
+      <header class="cr-output-head">
+        <span class="cr-output-tag">Example output</span>
+        <span class="cr-output-sub">Critiquing a typical SaaS landing page</span>
+      </header>
+
+      <div class="cr-voices">
+        {exampleCritique.voices.map((v) => (
+          <article class="cr-voice">
+            <h2 class="cr-voice-name">{v.name}</h2>
+            <p class="cr-voice-text">{v.critique}</p>
+          </article>
+        ))}
+      </div>
+
+      <div class="cr-thread">
+        <span class="cr-thread-label">Where they agree</span>
+        <p class="cr-thread-text">{exampleCritique.common_thread}</p>
+      </div>
+    </section>
+  </main>
+
+  <style>
+    .cr {
+      max-width: var(--site-max-width);
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(2.5rem, 5vw, 4rem);
+    }
+
+    .cr-head { max-width: 60ch; }
+    .cr-eyebrow {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      margin: 0 0 1rem;
+    }
+    .cr-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+    .cr-lede {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      margin: 0 0 clamp(1.5rem, 3vw, 2rem);
+    }
+    .cr-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(var(--foreground-color-rgb), 0.12);
+    }
+    .cr-meta-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .cr-meta-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+    }
+    .cr-meta-value {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      color: var(--foreground-color);
+    }
+
+    /* Input */
+    .cr-input {
+      padding: clamp(1.5rem, 3vw, 2rem);
+      background: #ffffff;
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .cr-form { display: flex; flex-direction: column; gap: clamp(1rem, 2vw, 1.5rem); }
+
+    .cr-drop {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 10rem;
+      padding: 1.5rem;
+      border: 2px dashed rgba(var(--foreground-color-rgb), 0.18);
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: border-color 200ms ease, background 200ms ease;
+    }
+    .cr-drop:hover,
+    .cr-drop:focus,
+    .cr-drop.is-dragging {
+      border-color: var(--accent);
+      background: rgba(var(--foreground-color-rgb), 0.02);
+      outline: none;
+    }
+    .cr-drop-empty { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; text-align: center; }
+    .cr-drop-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-h5);
+      font-weight: 400;
+      letter-spacing: -0.015em;
+      color: var(--foreground-color);
+    }
+    .cr-drop-sub {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.55);
+    }
+    .cr-drop-preview { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 0.875rem; }
+    .cr-drop-preview[hidden],
+    .cr-drop-empty[hidden] { display: none; }
+    .cr-drop-preview img {
+      max-width: 100%;
+      max-height: 18rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    }
+    .cr-drop-clear {
+      padding: 0.375rem 0.875rem;
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.18);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--foreground-color);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      cursor: pointer;
+    }
+    .cr-drop-clear:hover { background: rgba(var(--foreground-color-rgb), 0.06); }
+
+    .cr-context { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cr-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+    }
+    .cr-context textarea {
+      width: 100%;
+      padding: 0.75rem 0.875rem;
+      border: 1px solid rgba(var(--foreground-color-rgb), 0.12);
+      border-radius: 0.5rem;
+      background: rgba(var(--foreground-color-rgb), 0.03);
+      color: var(--foreground-color);
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      line-height: 1.5;
+      resize: vertical;
+      box-sizing: border-box;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+    .cr-context textarea:focus { outline: none; border-color: var(--accent); background: #ffffff; }
+
+    .cr-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+    .cr-action {
+      padding: 0.75rem 1.5rem;
+      border: 1px solid var(--fg);
+      border-radius: 999px;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 160ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cr-action:hover { transform: translateY(-1px); }
+    .cr-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .cr-action.is-loading .cr-action-text::after {
+      content: '';
+      display: inline-block;
+      width: 0.875em;
+      height: 0.875em;
+      margin-left: 0.5em;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      vertical-align: -0.15em;
+      animation: cr-spin 0.8s linear infinite;
+    }
+    @keyframes cr-spin { to { transform: rotate(360deg); } }
+
+    .cr-status {
+      margin: 0;
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.6);
+    }
+    .cr-status.is-error { color: var(--accent); }
+
+    /* Output */
+    .cr-output { display: flex; flex-direction: column; gap: clamp(1.25rem, 2vw, 1.75rem); }
+    .cr-output-head { display: flex; flex-direction: column; gap: 0.25rem; }
+    .cr-output-tag {
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .cr-output-sub {
+      font-family: var(--titleFont);
+      font-size: var(--text-h5);
+      letter-spacing: -0.015em;
+      font-weight: 400;
+    }
+
+    .cr-voices {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(0.875rem, 1.5vw, 1.25rem);
+    }
+    @media (max-width: 1024px) { .cr-voices { grid-template-columns: 1fr; } }
+
+    .cr-voice {
+      padding: clamp(1.25rem, 2.5vw, 1.75rem);
+      background: #ffffff;
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .cr-voice-name {
+      font-family: var(--titleFont);
+      font-size: var(--text-h5);
+      letter-spacing: -0.015em;
+      font-weight: 400;
+      color: var(--accent);
+      margin: 0;
+    }
+    .cr-voice-text {
+      font-family: var(--sansFont);
+      font-size: var(--text-medium);
+      line-height: 1.55;
+      color: rgba(var(--foreground-color-rgb), 0.78);
+      margin: 0;
+    }
+
+    .cr-thread {
+      padding: clamp(1.25rem, 2.5vw, 1.75rem);
+      background: var(--fg);
+      color: var(--bg);
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .cr-thread-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent-bright, var(--bg));
+      opacity: 0.7;
+    }
+    .cr-thread-text {
+      margin: 0;
+      font-family: var(--titleFont);
+      font-size: var(--text-h5);
+      line-height: 1.3;
+      letter-spacing: -0.015em;
+      color: var(--bg);
+    }
+  </style>
+
+  <script is:inline define:vars={{ WORKER_URL }} data-astro-rerun>
+    (() => {
+      const form = document.getElementById('cr-form');
+      const drop = document.getElementById('cr-drop');
+      const fileInput = document.getElementById('cr-file');
+      const empty = document.getElementById('cr-drop-empty');
+      const previewWrap = document.getElementById('cr-drop-preview');
+      const previewImg = document.getElementById('cr-preview');
+      const clearBtn = document.getElementById('cr-drop-clear');
+      const textInput = document.getElementById('cr-text');
+      const submit = document.getElementById('cr-submit');
+      const submitText = submit?.querySelector('.cr-action-text');
+      const status = document.getElementById('cr-status');
+      const output = document.getElementById('cr-output');
+      if (!form || !drop || !fileInput || !output) return;
+
+      let dataUrl = '';
+
+      const setStatus = (msg, isError = false) => {
+        status.textContent = msg || '';
+        status.classList.toggle('is-error', !!isError);
+      };
+
+      const showPreview = (url) => {
+        dataUrl = url;
+        previewImg.src = url;
+        previewWrap.hidden = false;
+        empty.hidden = true;
+      };
+
+      const clearPreview = () => {
+        dataUrl = '';
+        previewImg.src = '';
+        previewWrap.hidden = true;
+        empty.hidden = false;
+        fileInput.value = '';
+      };
+
+      const ingestFile = (file) => {
+        if (!file) return;
+        if (!/^image\//.test(file.type)) {
+          setStatus('That doesn\\u2019t look like an image.', true);
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          setStatus('Image must be under 5MB.', true);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          showPreview(String(reader.result || ''));
+          setStatus('');
+        };
+        reader.readAsDataURL(file);
+      };
+
+      drop.addEventListener('click', () => fileInput.click());
+      drop.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          fileInput.click();
+        }
+      });
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        ingestFile(file);
+      });
+      clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearPreview();
+      });
+
+      // Drag-drop
+      ['dragenter', 'dragover'].forEach((evt) => {
+        drop.addEventListener(evt, (e) => {
+          e.preventDefault();
+          drop.classList.add('is-dragging');
+        });
+      });
+      ['dragleave', 'drop'].forEach((evt) => {
+        drop.addEventListener(evt, (e) => {
+          e.preventDefault();
+          drop.classList.remove('is-dragging');
+        });
+      });
+      drop.addEventListener('drop', (e) => {
+        const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        ingestFile(file);
+      });
+
+      // Paste from clipboard
+      window.addEventListener('paste', (e) => {
+        const items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        for (const item of items) {
+          if (item.kind === 'file' && item.type.startsWith('image/')) {
+            ingestFile(item.getAsFile());
+            return;
+          }
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!dataUrl && !textInput.value.trim()) {
+          setStatus('Drop an image or write a few words of context.', true);
+          return;
+        }
+        if (WORKER_URL === 'REPLACE_WITH_WORKER_URL') {
+          setStatus('Worker not configured yet. Coming online soon.', true);
+          return;
+        }
+        submit.disabled = true;
+        submit.classList.add('is-loading');
+        if (submitText) submitText.textContent = 'Thinking';
+        setStatus('Claude is looking at it…');
+
+        try {
+          const r = await fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              image: dataUrl,
+              text: textInput.value.trim(),
+            }),
+          });
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok || data.error) {
+            throw new Error(data.error || `Request failed (${r.status})`);
+          }
+          renderResult(data);
+          setStatus('');
+        } catch (err) {
+          setStatus(err.message || 'Something went wrong. Try again.', true);
+        } finally {
+          submit.disabled = false;
+          submit.classList.remove('is-loading');
+          if (submitText) submitText.textContent = 'Get critique';
+        }
+      });
+
+      const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+
+      const renderResult = (data) => {
+        const voicesHtml = data.voices.map((v) => `
+          <article class="cr-voice">
+            <h2 class="cr-voice-name">${escapeHtml(v.name)}</h2>
+            <p class="cr-voice-text">${escapeHtml(v.critique)}</p>
+          </article>
+        `).join('');
+        output.innerHTML = `
+          <header class="cr-output-head">
+            <span class="cr-output-tag">Your critique</span>
+            <span class="cr-output-sub">Three voices, one shipped opinion</span>
+          </header>
+          <div class="cr-voices">${voicesHtml}</div>
+          <div class="cr-thread">
+            <span class="cr-thread-label">Where they agree</span>
+            <p class="cr-thread-text">${escapeHtml(data.common_thread)}</p>
+          </div>
+        `;
+        output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+    })();
+  </script>
+</Layout>

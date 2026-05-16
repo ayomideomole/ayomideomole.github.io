@@ -12,7 +12,7 @@ interface Palette {
 interface Props {
   title: string;
   description?: string;
-  pageClass: 'home' | 'about' | 'archive' | 'post' | 'workpage' | 'work' | 'research' | 'notes';
+  pageClass: 'home' | 'about' | 'archive' | 'post' | 'workpage' | 'work' | 'research' | 'notes' | 'playground';
   ogImage?: string;
   canonicalUrl?: string;
   palette?: Palette;
@@ -213,7 +213,8 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
           '<span class="site-pill-indicator" aria-hidden="true"></span>' +
           '<a href="/" data-section="home">Home</a>' +
           '<a href="/research/" data-section="research">Research</a>' +
-          '<a href="/notes/" data-section="notes">Notes</a>';
+          '<a href="/notes/" data-section="notes">Notes</a>' +
+          '<a href="/play/" data-section="play">Play</a>';
 
         const sync = (opts = {}) => {
           const pill = document.querySelector('.site-pill');
@@ -276,7 +277,7 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
           const findActive = () => {
             for (const a of links) {
               const sec = a.getAttribute('data-section');
-              if (cls.includes(sec) || (sec === 'notes' && (cls.includes('archive') || cls.includes('post'))) || (sec === 'work' && cls.includes('workpage'))) {
+              if (cls.includes(sec) || (sec === 'notes' && (cls.includes('archive') || cls.includes('post'))) || (sec === 'work' && cls.includes('workpage')) || (sec === 'play' && cls.includes('playground'))) {
                 return a;
               }
             }
@@ -407,6 +408,11 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
         --accent-bright: #c97aff;
         --foreground-color-rgb: 26, 22, 32;
       }
+      :root.playground {
+        --bg: #f5f1e8; --fg: #161412; --accent: #d63a6f;
+        --accent-bright: #ff7aa6;
+        --foreground-color-rgb: 22, 20, 18;
+      }
 
       /* Derived token contract (applies to every section + project pages) */
       html {
@@ -430,7 +436,8 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
       :root.about,
       :root.work,
       :root.archive, :root.notes, :root.post,
-      :root.research {
+      :root.research,
+      :root.playground {
         --background-color: var(--bg);
         --letterbox-color: var(--bg);
         --foreground-color: var(--fg);
@@ -443,7 +450,8 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
         :root.about,
         :root.work,
         :root.archive, :root.notes, :root.post,
-        :root.research {
+        :root.research,
+        :root.playground {
           --background-color: var(--bg);
           --letterbox-color: var(--bg);
           --foreground-color: var(--fg);
@@ -601,7 +609,8 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
       html.notes    .site-pill a[data-section="notes"],
       html.archive  .site-pill a[data-section="notes"],
       html.post     .site-pill a[data-section="notes"],
-      html.workpage .site-pill a[data-section="work"] {
+      html.workpage .site-pill a[data-section="work"],
+      html.playground .site-pill a[data-section="play"] {
         color: var(--accent-bright, var(--bg));
       }
       /* Sliding active indicator */
@@ -772,6 +781,12 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
         margin: clamp(3rem, 6vw, 5rem) 0 0;
       }
       .site-foot-dot { opacity: 0.6; }
+      .site-foot-bottom-link {
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px solid currentColor;
+      }
+      .site-foot-bottom-link:hover { color: var(--foreground-color); }
     </style>
   </head>
   <body>
@@ -790,6 +805,7 @@ const paletteStyle = palette ? paletteVars(palette) : undefined;
           <a href="/" data-section="home">Home</a>
           <a href="/research/" data-section="research">Research</a>
           <a href="/notes/" data-section="notes">Notes</a>
+          <a href="/play/" data-section="play">Play</a>
         </nav>
       )}
       <div class="site-time" aria-label="Local time in Tallinn">

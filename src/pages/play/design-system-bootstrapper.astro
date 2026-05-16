@@ -1,0 +1,411 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const skill = `---
+name: design-system-bootstrapper
+description: Given a brand brief, vibe description, or one-line product concept, produce the foundation of a coherent design system — palette with WCAG checks, type scale, spacing rhythm, component shapes, naming conventions, and the three next decisions worth making.
+---
+
+You are a senior product designer helping someone start a new project. When given a brand brief, vibe description, or even a one-line concept, your job is to produce the FOUNDATION of a coherent design system before any pages or screens get built. Most projects skip this and end up re-deciding every page. Don't.
+
+Return a structured starter system as markdown with the sections below. Be specific. Include rationale. Reference real values, not placeholders.
+
+## 1. The voice
+One sentence capturing the personality of the brand/product. Then three adjectives that will guide design decisions. ("Calm, expert, slightly playful.") The adjectives are load-bearing — they should be specific enough to rule choices in and out.
+
+## 2. Color palette
+One to three palettes. If the site has distinct sections (marketing vs app, or sections of a publication), give one palette per section. For each:
+- **bg** (background) — hex
+- **fg** (foreground / primary text) — hex
+- **accent** — hex
+- Verify contrast and state the actual ratio:
+  - fg/bg must be ≥ 7:1 (WCAG AAA body text)
+  - accent/bg must be ≥ 4.5:1 (WCAG AA for links and interactive elements)
+- Optional derived tokens:
+  - **accent-bright** for use on dark UI surfaces — \`color-mix(in oklab, accent, white 38%)\`
+  - **surface-2**, **surface-3** for cards and panels — \`color-mix(in oklab, bg, fg 4%)\`, \`color-mix(in oklab, bg, fg 8%)\`
+
+If any pair fails contrast, fix it and explain what you adjusted.
+
+## 3. Type scale
+- Choose ONE display family + ONE body family. Justify the pairing in one sentence. Optionally add a mono family for data/code, only if the project needs it.
+- Generate scale tokens: \`display, h1, h2, h3, h4, h5, large, medium, body, small, mini, micro\`. Pick a ratio (1.067 minor 2nd → 1.618 golden) and a 16px base. Output both px and rem for each tier.
+- Recommend a line-height curve: tight at top (0.92–1.05), opening at h3–h5 (1.1–1.2), loose at body and below (1.5).
+- Mention which OpenType features matter for this brand (e.g. small caps, oldstyle figures, tabular nums).
+
+## 4. Spacing rhythm
+- Pick a base unit (4px or 8px) and a scale: \`xs, sm, md, lg, xl, 2xl, 3xl\`. Output the values.
+- Recommend two section-level rhythm tokens:
+  - \`--gap-tight\` — between related blocks
+  - \`--gap-loose\` — between major sections
+- Use \`clamp()\` for both so they breathe between mobile and desktop.
+
+## 5. Component shapes
+- **Border radius scale** — pick 3 values and say where each applies (inputs, cards, pills).
+- **Card surface pattern** — background, radius, shadow recipe. Be specific. ("white #ffffff, border-radius 1rem, box-shadow 0 1px 2px rgba(0,0,0,0.04)" not "subtle elevation").
+- **Border tokens** — recipes for subtle dividers vs input outlines vs strong rules.
+
+## 6. Naming
+- **Section names** — what each top-level area is called. Names carry voice. Avoid generic ones ("Blog", "Portfolio", "Tools") unless they're already strong.
+- **CSS prefix convention** — short two-letter prefixes per page/component (\`.pl-\` for play, \`.cs-\` for case study, \`.np-\` for note post). Keeps selectors short and scoped.
+- **Token naming pattern** — show the shape with examples (\`--text-display\`, \`--leading-h1\`, \`--gap-loose\`, \`--accent-bright\`).
+
+## 7. The three decisions
+The next three architectural choices that will most shape the system. Phrase each as a direct question, give your recommended answer in one sentence, then the trade-off in one sentence. Examples:
+- "Static or app? — Static. Forces clean architecture and costs nothing. Trade-off: anything dynamic needs a separate worker."
+- "One palette or per-section palettes? — Per-section, within a constrained set. Trade-off: more decisions per page, but the site reads as a publication, not a uniform product."
+- "Sans + serif pair, or single family? — Pair. Serif for display creates editorial gravity; sans for body keeps reading effortless. Trade-off: two font files to load."
+
+## TONE
+
+Write like a senior designer kicking off a project — specific, opinionated, includes rationale, references conventions by name. Not like a tool that generates tokens.
+
+## LENGTH
+
+Keep the whole brief under 1000 words. Dense bullets. No preamble. Cut anything the reader can infer.`;
+
+const sampleInput = `A personal portfolio site for a senior product designer working at the intersection of AI and cybersecurity. Tone: thoughtful, restrained, craft-led. Should feel editorial — like a publication, not a typical portfolio. Will have a home page with featured work, case studies, research threads, a notes/writing section, and a Play section for small interactive tools. Built on Astro, static hosting.`;
+
+const sampleOutput = `## 1. The voice
+A personal site that reads like a quiet design publication, not a CV. **Editorial, deliberate, quietly opinionated.**
+
+## 2. Color palette
+Per-section palettes, varied within a constrained set. Each tuned to feel like a department of the same publication.
+
+**Home (cream + lime)** — landing
+- bg: #f3f3e9 · fg: #0f1d07 · accent: #82d660 (lime)
+- accent-bright: #8efb6c · surface-2: #eeeee2
+- Contrast: fg/bg 16.2:1 ✓ · accent/bg 4.6:1 ✓
+
+**Research (lilac + violet)**
+- bg: #ece4f0 · fg: #1a1620 · accent: #5a2880
+- accent-bright: #c97aff
+- Contrast: fg/bg 17.1:1 ✓ · accent/bg 9.8:1 ✓
+
+**Notes (mint + forest)**
+- bg: #e2eee6 · fg: #161a18 · accent: #1f5a3a
+- accent-bright: #6cf0a0
+- Contrast: fg/bg 16.3:1 ✓ · accent/bg 7.2:1 ✓
+
+**Per-case-study palette schema** — each project ships its own \`{ bg, fg, accent }\` validated by the same rules. Enforce contrast in the content schema so bad palettes can't ship.
+
+## 3. Type scale
+**Pair:** Untitled Serif (display) + Inter (body) + IBM Plex Mono (data/code only).
+
+Why: the serif gives the site editorial gravity at large sizes; Inter is the cleanest humanist sans for dense reading; Plex Mono signals "this is data" without breaking the publication mood.
+
+**Scale (1.25 major-third, 16px base):**
+- display 7.5rem / 120px
+- h1 4.15rem / 66.5px
+- h2 3.32rem / 53.2px
+- h3 2.91rem / 46.6px
+- h4 2.33rem / 37.3px
+- h5 1.99rem / 31.9px
+- large 1.66rem / 26.6px
+- medium 1.5rem / 24px
+- body 1rem / 16px
+- small 0.93rem / 15px
+- mini 0.875rem / 14px
+- micro 0.75rem / 12px
+
+**Line-height curve:** display 0.92 · h1–h2 0.98 · h3–h4 1.05 · h5 1.2 · body and below 1.5.
+
+**OpenType:** enable oldstyle figures in body copy (\`font-feature-settings: "onum"\`), tabular nums in the time clock and any data tables.
+
+## 4. Spacing rhythm
+**Base:** 4px.
+**Scale:** xs(4) · sm(8) · md(16) · lg(24) · xl(40) · 2xl(64) · 3xl(96).
+
+**Section rhythm:**
+- \`--gap-tight: clamp(2rem, 4vw, 4rem)\` — between related blocks
+- \`--gap-loose: clamp(4rem, 8vw, 8rem)\` — between major sections
+
+## 5. Component shapes
+**Radius:**
+- 0.5rem (8px) — inputs, code blocks
+- 1rem–1.25rem — cards, panels, modal sheets
+- 999px — pills (active states, badges, primary buttons)
+
+**Card surface:** \`background: #ffffff; border-radius: 1rem; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);\`. Subtle enough to feel like the surface is part of the page, not floating.
+
+**Borders:**
+- subtle divider: \`rgba(var(--foreground-color-rgb), 0.08)\`
+- input outline: \`rgba(var(--foreground-color-rgb), 0.18)\`
+- strong rule: \`rgba(var(--foreground-color-rgb), 0.32)\`
+
+## 6. Naming
+**Sections:** Home · Work · Research · Notes · Play.
+("Play" not "Playground", "Notes" not "Blog", "Research" not "Writing" — pick names that carry voice.)
+
+**CSS prefixes:** two-letter, per page/component. Examples: \`.pl-\` (play), \`.cs-\` (case study), \`.np-\` (note post), \`.ts-\` (type scale), \`.cr-\` (critique).
+
+**Token shape:**
+- Colors: \`--bg, --fg, --accent, --accent-bright, --surface-2, --foreground-color-rgb\`
+- Type: \`--text-display\` through \`--text-micro\`, \`--leading-display\` through \`--leading-body\`
+- Space: \`--gap-tight, --gap-loose, --site-edge\`
+
+## 7. The three decisions
+1. **Static or app?** — Static. Astro + GitHub Pages. Forces clean architecture and costs nothing. Trade-off: anything dynamic (live AI tools, forms) needs a separate Cloudflare/Vercel worker.
+
+2. **One palette or per-section palettes?** — Per-section, within a constrained set of 4–5. Trade-off: more decisions per page, but the site feels like a publication with distinct departments rather than one flat brand.
+
+3. **Sans + serif pair, or single family?** — Pair. Serif for display creates editorial gravity; sans for body keeps reading effortless. Trade-off: two font files to self-host, but the contrast is the brand.`;
+---
+<Layout
+  pageClass="playground"
+  title="Design system bootstrapper — Ayo Omole"
+  description="A Claude skill that turns a brand brief into the foundation of a coherent design system — palette, type, spacing, naming, and the next three decisions."
+  palette={{ bg: '#ecf0e6', fg: '#14210e', accent: '#2f6b1c' }}
+>
+  <main class="sk">
+    <header class="sk-head">
+      <p class="sk-eyebrow">Play · 04 · Claude skill</p>
+      <h1 class="sk-title">Design system bootstrapper.</h1>
+      <p class="sk-lede">
+        Drop a one-paragraph brief, a vibe board, or even a one-line product concept. The skill returns a starter design system — palette (with WCAG checks), type scale, spacing rhythm, component shapes, naming conventions, and the three architectural decisions worth making next. Front-load the boring work so the rest of the project gets cheap.
+      </p>
+
+      <div class="sk-meta">
+        <div class="sk-meta-item"><span class="sk-meta-label">Type</span><span class="sk-meta-value">Claude skill</span></div>
+        <div class="sk-meta-item"><span class="sk-meta-label">Use it in</span><span class="sk-meta-value">Claude.ai · API</span></div>
+        <div class="sk-meta-item"><span class="sk-meta-label">Built for</span><span class="sk-meta-value">Designers starting a new project</span></div>
+      </div>
+    </header>
+
+    <section class="sk-howto" aria-label="How to use">
+      <h2 class="sk-section-title">How to use it</h2>
+      <ol class="sk-steps">
+        <li><strong>Copy the skill.</strong> The whole thing is below. One click.</li>
+        <li><strong>Paste it into Claude.</strong> Upload as a custom skill in Claude.ai, or use as the system prompt via the API.</li>
+        <li><strong>Drop your brief.</strong> A paragraph, a list of adjectives, a moodboard description, a single sentence — any of it works. The thinner the brief, the more the skill will lean on its defaults.</li>
+        <li><strong>Use it as your kickoff doc.</strong> Tokens go straight into CSS variables. Pair with the Type scale generator to refine numbers. Argue the three open decisions before you draw a single rectangle.</li>
+      </ol>
+    </section>
+
+    <section class="sk-example" aria-label="Example">
+      <h2 class="sk-section-title">Example</h2>
+      <div class="sk-example-grid">
+        <div class="sk-example-col">
+          <div class="sk-example-head">
+            <span class="sk-example-label">Input</span>
+            <span class="sk-example-sub">A one-paragraph brief</span>
+          </div>
+          <pre class="sk-code"><code>{sampleInput}</code></pre>
+        </div>
+        <div class="sk-example-col">
+          <div class="sk-example-head">
+            <span class="sk-example-label">Output</span>
+            <span class="sk-example-sub">The starter system Claude returns</span>
+          </div>
+          <pre class="sk-code sk-code--out"><code>{sampleOutput}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="sk-skill" aria-label="The skill">
+      <header class="sk-skill-head">
+        <h2 class="sk-section-title">The skill</h2>
+        <button type="button" class="sk-action sk-action--primary" data-action="copy">
+          <span class="sk-action-text">Copy skill</span>
+        </button>
+      </header>
+      <pre class="sk-code sk-code--skill" id="sk-content"><code>{skill}</code></pre>
+    </section>
+  </main>
+
+  <style>
+    .sk {
+      max-width: var(--site-max-width);
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(2.5rem, 5vw, 4rem);
+    }
+
+    .sk-head { max-width: 60ch; }
+    .sk-eyebrow {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      margin: 0 0 1rem;
+    }
+    .sk-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+    .sk-lede {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      margin: 0 0 clamp(1.5rem, 3vw, 2rem);
+    }
+    .sk-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(var(--foreground-color-rgb), 0.12);
+    }
+    .sk-meta-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .sk-meta-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+    }
+    .sk-meta-value {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      color: var(--foreground-color);
+    }
+
+    .sk-section-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-h3);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .sk-steps {
+      counter-reset: step;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.875rem, 1.5vw, 1.25rem);
+      max-width: 60ch;
+    }
+    .sk-steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 2.5rem;
+      font-family: var(--sansFont);
+      font-size: var(--text-medium);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.78);
+    }
+    .sk-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      display: grid;
+      place-items: center;
+      font-family: var(--monoFont);
+      font-size: var(--text-mini);
+      font-weight: 500;
+    }
+    .sk-steps strong { color: var(--foreground-color); font-weight: 600; }
+
+    .sk-example-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(1rem, 2vw, 1.5rem);
+    }
+    @media (max-width: 880px) {
+      .sk-example-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+    .sk-example-col { display: flex; flex-direction: column; gap: 0.75rem; }
+    .sk-example-head { display: flex; flex-direction: column; gap: 0.125rem; }
+    .sk-example-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      color: var(--foreground-color);
+    }
+    .sk-example-sub {
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      color: rgba(var(--foreground-color-rgb), 0.55);
+    }
+
+    .sk-code {
+      margin: 0;
+      padding: clamp(1rem, 2vw, 1.5rem);
+      background: #ffffff;
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      font-family: var(--monoFont);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: var(--foreground-color);
+      overflow-x: auto;
+      max-height: 30rem;
+      overflow-y: auto;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .sk-code code { font-family: inherit; }
+    .sk-code--out { background: rgba(var(--foreground-color-rgb), 0.04); box-shadow: none; }
+    .sk-code--skill {
+      max-height: none;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+    }
+
+    .sk-skill-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    }
+    .sk-skill-head .sk-section-title { margin: 0; }
+
+    .sk-action {
+      padding: 0.75rem 1.25rem;
+      border: 1px solid var(--fg);
+      border-radius: 999px;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sk-action:hover { transform: translateY(-1px); }
+    .sk-action.is-confirmed {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+  </style>
+
+  <script is:inline data-astro-rerun>
+    (() => {
+      const btn = document.querySelector('[data-action="copy"]');
+      const code = document.getElementById('sk-content');
+      if (!btn || !code) return;
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+          const txt = btn.querySelector('.sk-action-text');
+          const original = txt.textContent;
+          btn.classList.add('is-confirmed');
+          txt.textContent = 'Copied!';
+          setTimeout(() => {
+            btn.classList.remove('is-confirmed');
+            txt.textContent = original;
+          }, 1400);
+        });
+      });
+    })();
+  </script>
+</Layout>

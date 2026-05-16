@@ -1,0 +1,459 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const skill = `---
+name: prd-to-design-brief
+description: Translate a PRD into an actionable design brief — user stories in user voice, required UI states, components needed, copy gaps, accessibility considerations, measurable outcomes, and open questions for PM.
+---
+
+You are a senior product designer reviewing a PRD that's about to become a design ticket. Your job is to translate prose-heavy PM-speak into an actionable design brief.
+
+When given a PRD, return a structured markdown document with these sections (omit any section that genuinely doesn't apply, but be conservative — most do):
+
+## 1. The job, in one line
+A single sentence in user voice. Format: "As a [user type], I want to [action] so that [outcome]."
+
+## 2. User stories
+3–7 specific user stories, in user voice. Cover the happy path plus at least one edge case or error scenario.
+
+## 3. Required UI states
+For every screen or component the PRD implies, list the states that need to be designed. For each state, mark whether the PRD addresses it (✓), skips it (✗), or is ambiguous (?):
+- Default / loaded
+- Loading / pending
+- Empty (first-time, before any user action)
+- Empty (after action, e.g. "you've cleared everything")
+- Error (network, validation, permission)
+- Success
+- Disabled / locked
+- Focus / hover / active
+- Long content / truncation
+
+## 4. Components
+Components you'll touch or create. For each: existing in the design system, or net-new? If net-new, why does this need to be its own component vs. a variant of something existing?
+
+## 5. Copy required
+List every piece of UI copy this feature needs (button labels, placeholders, error messages, success states, empty states, tooltips, microcopy). For each:
+- The copy slot
+- A first-pass suggestion in 4–8 words
+- Whether final copy needs review by content design or legal
+
+## 6. Accessibility
+Checklist specific to this feature, not generic boilerplate:
+- Keyboard navigation paths and order
+- Screen reader announcements (live regions, status messages)
+- Focus management (especially on modals, sheets, and async actions)
+- Color contrast risks (call out specific token pairs if relevant)
+- Motion and animation concerns
+- ARIA roles and labels needed
+
+## 7. Measurable outcomes
+What will tell you this design worked? List 1–3 concrete metrics. For each: baseline (if stated), target (if stated), and a flag if either is missing from the PRD.
+
+## 8. Open questions for PM
+The most important things the PRD didn't answer. Numbered list, 5–10 questions, each phrased as a direct question. Sort by which one most blocks design from starting. Be specific — "What happens when the user has 1000 of these?" beats "What about scale?"
+
+## 9. Risk flags
+Things worth raising before you start:
+- Scope creep risks
+- Technical assumptions that may not hold
+- Missing or stale user research
+- Overlooked accessibility issues
+- Compliance, legal, or privacy concerns
+- Cross-platform parity gaps
+
+## Tone
+Write like a thoughtful senior designer who's seen this before. Direct but not snarky. Specific over generic. Reference UI patterns by name (e.g. "skeleton loader", "optimistic update", "non-blocking toast") when relevant.
+
+## Length
+Keep the whole brief under 800 words. Tight headlines, dense bullets, no preamble. Cut anything the reader can infer.
+`;
+
+const sampleInput = `# Notification Center MVP
+Author: Janelle K. · Q2
+
+## Background
+Users have been asking for a centralized place to see their alerts. We currently surface alerts in three places (top bar, settings, dashboard), which creates a fragmented experience. Research shows 67% of power users miss critical alerts.
+
+## Goal
+Build a unified notification center accessible from every page.
+
+## Requirements
+- Clicking the bell icon in the top bar opens a panel
+- Panel shows a list of recent notifications, most recent first
+- Notifications can be dismissed individually or all at once
+- Should be performant
+- Accessible
+
+## Success metrics
+TBD
+
+## Out of scope
+- Notification preferences and settings
+- Push notifications
+- Email digests`;
+
+const sampleOutput = `## 1. The job, in one line
+As a power user, I want to see all my alerts in one place so I stop missing the critical ones.
+
+## 2. User stories
+- I open the notification center and see what needs my attention, ordered by recency.
+- I dismiss a notification I've handled — it disappears from the list and won't come back.
+- I clear all notifications at once when I'm caught up.
+- I open the panel mid-task and close it without losing context.
+- I receive a new notification while the panel is open — it should appear without flicker.
+- (Edge) I have hundreds of notifications. The list stays performant and lets me reach the older ones.
+
+## 3. Required UI states
+**Bell icon (trigger):**
+- Default ✓
+- Active / panel open ?
+- Unread badge (with count) ✗
+- No unread (badge hidden) ✗
+
+**Notification panel:**
+- Default with notifications ✓
+- Loading (initial fetch) ✗
+- Empty (no notifications ever) ✗
+- Empty (all cleared) ✗
+- Error (fetch failed) ✗
+- Long list (scroll, sticky header) ✗
+
+**Single notification row:**
+- Default ✓
+- Unread vs. read ✗
+- Hover / focus ✗
+- Dismissing (animation) ✗
+
+## 4. Components
+- **Bell icon button** — likely exists; needs unread-count variant.
+- **Notification panel** — net-new. A side sheet or popover from the bell. Probably a popover for desktop, full-screen sheet for mobile. Reason for net-new: it's a unique anchored container with its own scroll.
+- **Notification row** — net-new. Reusable across panel and any future inbox view.
+- **Empty state** — generic, but needs two flavors (never had any, just cleared).
+- **Toast** for "All cleared" confirmation if undo is supported.
+
+## 5. Copy required
+- Bell aria-label: "Notifications, 3 unread" (4–6 words, dynamic count)
+- Panel header: "Notifications"
+- Empty (never): "All quiet here."
+- Empty (cleared): "You're caught up."
+- Dismiss action: "Dismiss" (button) — needs content design review for tone
+- Clear-all action: "Clear all"
+- Confirm clear-all: "Clear all 12 notifications?" — legal/content review
+- Error: "Couldn't load notifications. Retry?"
+- Time stamps: relative ("2 min ago") with a hover tooltip showing absolute timestamp
+
+## 6. Accessibility
+- Panel must be reachable via keyboard from the bell button (Enter / Space opens, Esc closes)
+- Focus moves into the panel on open; returns to bell on close
+- Each notification row is a focusable element with a clear label and a "dismiss" button as a child action
+- Live region announcement on new notification arrival ("New notification") — but only when panel is closed, to avoid double-announcement
+- Color contrast: unread indicator must not rely on color alone — pair with a dot or weight change
+- Reduced-motion: replace dismiss-slide animation with a quick fade
+- ARIA: role="dialog" or role="region" with aria-label="Notifications" on the panel; aria-live="polite" on the list
+
+## 7. Measurable outcomes
+- **Critical-alert miss rate** — baseline 67% (stated), target unstated. Flag: PM has not committed to a target.
+- **Panel open events per active user / week** — baseline ✗, target ✗. Flag: no metric defined.
+- **Time-to-dismiss after new notification** — would tell us if visibility actually improved. Flag: not in PRD.
+
+## 8. Open questions for PM
+1. Is unread state tracked per user, or does opening the panel mark all as read?
+2. What's the maximum age of notifications shown? (Last 7 days? 30? Forever?)
+3. Are notifications grouped by type or shown as a flat list?
+4. What action does clicking a notification trigger — navigate, mark read, both?
+5. Do "critical" notifications need different visual treatment, or is the alert center alone considered the fix?
+6. Is "clear all" reversible (undo toast) or permanent?
+7. What happens to a notification when the underlying object is deleted (e.g. a project mention when the project is gone)?
+8. Mobile: full-screen sheet, drawer, or same popover at smaller width?
+9. Are there permission scopes — i.e. can two users on the same workspace see different notifications?
+10. Is there a "snooze" affordance, or is dismiss the only verb?
+
+## 9. Risk flags
+- The PRD calls "performant" without defining a threshold. Pin down: how many rows before virtualization is required?
+- "Should be accessible" is not an a11y plan. Push for an explicit checklist.
+- Three current surfaces (top bar, settings, dashboard) — what happens to those? Are we deprecating them, leaving them, or quietly orphaning?
+- Out of scope says no preferences — but users will immediately ask "how do I turn off X?" Define the answer for the moment users ask, even if the feature ships later.
+- 67% baseline is from "research" — was this a survey, support tickets, analytics? The intervention you design depends on whether the issue is visibility, frequency, or signal-to-noise.`;
+---
+<Layout
+  pageClass="playground"
+  title="PRD → Design brief — Ayo Omole"
+  description="A Claude skill that turns a prose-heavy PRD into a structured, actionable design brief."
+  palette={{ bg: '#f5ede1', fg: '#1f1409', accent: '#b8480f' }}
+>
+  <main class="sk">
+    <header class="sk-head">
+      <p class="sk-eyebrow">Play · 02 · Claude skill</p>
+      <h1 class="sk-title">PRD → Design brief.</h1>
+      <p class="sk-lede">
+        Drop a PRD, get back the design brief you wish your PM had written. User stories in user voice, required UI states (with a check on which the PRD already covered), components, copy slots, a11y considerations, measurable outcomes, and the open questions worth chasing down before you start.
+      </p>
+
+      <div class="sk-meta">
+        <div class="sk-meta-item">
+          <span class="sk-meta-label">Type</span>
+          <span class="sk-meta-value">Claude skill</span>
+        </div>
+        <div class="sk-meta-item">
+          <span class="sk-meta-label">Use it in</span>
+          <span class="sk-meta-value">Claude.ai · API</span>
+        </div>
+        <div class="sk-meta-item">
+          <span class="sk-meta-label">Built for</span>
+          <span class="sk-meta-value">Designers</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="sk-howto" aria-label="How to use">
+      <h2 class="sk-section-title">How to use it</h2>
+      <ol class="sk-steps">
+        <li><strong>Copy the skill.</strong> The whole thing is below. One click.</li>
+        <li><strong>Paste it into Claude.</strong> Either upload as a custom skill in Claude.ai, or include it as the system prompt via the API.</li>
+        <li><strong>Drop your PRD.</strong> Paste the document text into the chat. Claude returns a structured design brief in markdown.</li>
+        <li><strong>Use it.</strong> Copy the brief into a Figma frame, a Linear ticket, or a Notion doc. Argue about the open questions before you draw a single rectangle.</li>
+      </ol>
+    </section>
+
+    <section class="sk-example" aria-label="Example">
+      <h2 class="sk-section-title">Example</h2>
+      <div class="sk-example-grid">
+        <div class="sk-example-col">
+          <div class="sk-example-head">
+            <span class="sk-example-label">Input</span>
+            <span class="sk-example-sub">A typical thin PRD</span>
+          </div>
+          <pre class="sk-code"><code>{sampleInput}</code></pre>
+        </div>
+        <div class="sk-example-col">
+          <div class="sk-example-head">
+            <span class="sk-example-label">Output</span>
+            <span class="sk-example-sub">The brief Claude returns</span>
+          </div>
+          <pre class="sk-code sk-code--out"><code>{sampleOutput}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="sk-skill" aria-label="The skill">
+      <header class="sk-skill-head">
+        <h2 class="sk-section-title">The skill</h2>
+        <button type="button" class="sk-action sk-action--primary" data-action="copy">
+          <span class="sk-action-text">Copy skill</span>
+        </button>
+      </header>
+      <pre class="sk-code sk-code--skill" id="sk-content"><code>{skill}</code></pre>
+    </section>
+  </main>
+
+  <style>
+    .sk {
+      max-width: var(--site-max-width);
+      margin: 0 auto;
+      padding: clamp(2rem, 4vw, 3rem) var(--site-edge) clamp(3rem, 6vw, 5rem);
+      box-sizing: border-box;
+      color: var(--foreground-color);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(2.5rem, 5vw, 4rem);
+    }
+
+    .sk-head {
+      max-width: 60ch;
+    }
+    .sk-eyebrow {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      margin: 0 0 1rem;
+    }
+    .sk-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-display);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+    .sk-lede {
+      font-family: var(--sansFont);
+      font-size: var(--text-large);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.7);
+      margin: 0 0 clamp(1.5rem, 3vw, 2rem);
+    }
+
+    .sk-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(var(--foreground-color-rgb), 0.12);
+    }
+    .sk-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .sk-meta-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      color: rgba(var(--foreground-color-rgb), 0.5);
+      letter-spacing: 0.02em;
+    }
+    .sk-meta-value {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      color: var(--foreground-color);
+    }
+
+    .sk-section-title {
+      font-family: var(--titleFont);
+      font-size: var(--text-h3);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      font-weight: 400;
+      margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .sk-steps {
+      counter-reset: step;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.875rem, 1.5vw, 1.25rem);
+      max-width: 60ch;
+    }
+    .sk-steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 2.5rem;
+      font-family: var(--sansFont);
+      font-size: var(--text-medium);
+      line-height: 1.5;
+      color: rgba(var(--foreground-color-rgb), 0.78);
+    }
+    .sk-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 50%;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      display: grid;
+      place-items: center;
+      font-family: var(--monoFont);
+      font-size: var(--text-mini);
+      font-weight: 500;
+    }
+    .sk-steps strong { color: var(--foreground-color); font-weight: 600; }
+
+    .sk-example-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(1rem, 2vw, 1.5rem);
+    }
+    @media (max-width: 880px) {
+      .sk-example-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+    .sk-example-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .sk-example-head { display: flex; flex-direction: column; gap: 0.125rem; }
+    .sk-example-label {
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      color: var(--foreground-color);
+    }
+    .sk-example-sub {
+      font-family: var(--sansFont);
+      font-size: var(--text-mini);
+      color: rgba(var(--foreground-color-rgb), 0.55);
+    }
+
+    .sk-code {
+      margin: 0;
+      padding: clamp(1rem, 2vw, 1.5rem);
+      background: #ffffff;
+      border-radius: clamp(0.75rem, 1.5vw, 1.25rem);
+      font-family: var(--monoFont);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: var(--foreground-color);
+      overflow-x: auto;
+      max-height: 30rem;
+      overflow-y: auto;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .sk-code code { font-family: inherit; }
+    .sk-code--out {
+      background: rgba(var(--foreground-color-rgb), 0.04);
+      box-shadow: none;
+    }
+    .sk-code--skill {
+      max-height: none;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+    }
+
+    .sk-skill-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    }
+    .sk-skill-head .sk-section-title { margin: 0; }
+
+    .sk-action {
+      padding: 0.75rem 1.25rem;
+      border: 1px solid var(--fg);
+      border-radius: 999px;
+      background: var(--fg);
+      color: var(--accent-bright, var(--bg));
+      font-family: var(--sansFont);
+      font-size: var(--text-small);
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sk-action:hover { transform: translateY(-1px); }
+    .sk-action.is-confirmed {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+  </style>
+
+  <script is:inline data-astro-rerun>
+    (() => {
+      const btn = document.querySelector('[data-action="copy"]');
+      const code = document.getElementById('sk-content');
+      if (!btn || !code) return;
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+          const txt = btn.querySelector('.sk-action-text');
+          const original = txt.textContent;
+          btn.classList.add('is-confirmed');
+          txt.textContent = 'Copied!';
+          setTimeout(() => {
+            btn.classList.remove('is-confirmed');
+            txt.textContent = original;
+          }, 1400);
+        });
+      });
+    })();
+  </script>
+</Layout>
